@@ -2,6 +2,7 @@ package org.psk.lab.order.data.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class OrderItem {
     private int quantity;
 
     @Column(nullable = false)
-    private float totalPrice;
+    private BigDecimal totalPrice;
 
 //    @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 //    private List<OrderItemVariation> variations = new ArrayList<>();
@@ -34,7 +35,7 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(Order order, int quantity, float totalPrice) {
+    public OrderItem(Order order, int quantity, BigDecimal totalPrice) {
         this.order = order;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
@@ -72,11 +73,11 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
-    public float getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(float totalPrice) {
+    public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
 

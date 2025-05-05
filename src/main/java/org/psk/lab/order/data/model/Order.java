@@ -2,6 +2,7 @@ package org.psk.lab.order.data.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class Order {
     private StatusType status;
 
     @Column(nullable = false)
-    private float totalAmount;
+    private BigDecimal totalAmount;
 
     //@Version cia reikia sito ar ne?
     private int version;
@@ -75,11 +76,11 @@ public class Order {
         this.status = status;
     }
 
-    public float getTotalAmount() {
+    public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(float totalAmount) {
+    public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
 
