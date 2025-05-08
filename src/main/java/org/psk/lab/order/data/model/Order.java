@@ -6,16 +6,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
+import org.psk.lab.order.data.model.StatusType;
 
 @Entity
+@Table(name = "order")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
+    @Column(name = "order_id", nullable = false, updatable = false)
     private UUID orderId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
+//    @ManyToOne
 //    @JoinColumn(nullable = false)
 //    private User user;
 
@@ -25,12 +27,13 @@ public class Order {
     private LocalDateTime pickupTime;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusType status;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
-    //@Version cia reikia sito ar ne?
+    @Version
     private int version;
 
     public Order() {

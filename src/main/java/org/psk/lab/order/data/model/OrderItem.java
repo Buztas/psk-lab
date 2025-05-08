@@ -3,34 +3,38 @@ package org.psk.lab.order.data.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
+@Table(name = "order_item")
 public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
+    @Column(name = "order_item_id", nullable = false, updatable = false)
     private UUID orderItemId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(nullable = false)
+//    @ManyToOne(optional = false)
+//    @JoinColumn(name = "menu_item_id", nullable = false)
 //    private MenuItem menuItem;
 
     @Column(nullable = false)
     private int quantity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
-//    @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-//    private List<OrderItemVariation> variations = new ArrayList<>();
+//    @ManyToMany
+//    @JoinTable(
+//            name = "order_item_variation",
+//            joinColumns = @JoinColumn(name = "order_item_id"),
+//            inverseJoinColumns = @JoinColumn(name = "item_variation_id")
+//    )
+//    private Set<ItemVariation> chosenVariations = new HashSet<>();
 
     public OrderItem() {
     }
@@ -80,13 +84,6 @@ public class OrderItem {
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
-
-//    public List<OrderItemVariation> getVariations() {
-//        return variations;
-//     }
-//    public void setVariations(List<OrderItemVariation> variations) {
-//       this.variations = variations;
-//    }
 
     @Override
     public boolean equals(Object o) {
