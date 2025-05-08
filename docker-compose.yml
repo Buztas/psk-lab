@@ -6,8 +6,8 @@ services:
     container_name: springboot_postgres
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root@111
       POSTGRES_DB: psql-db
     ports:
       - "5432:5432"

@@ -1,13 +1,12 @@
 package org.psk.lab.user.service;
 
 import org.psk.lab.user.data.dto.UserDTO;
-import org.psk.lab.user.data.model.User;
+import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.repository.UserRepository;
 import org.psk.lab.user.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -19,13 +18,13 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public User getUser(UUID uuid) {
+    public MyUser getUser(UUID uuid) {
         return userRepository.findById(uuid)
                 .orElseThrow(() -> new UserNotFoundException(uuid.toString()));
     }
 
     @Override
-    public List<User> getUsers() {
+    public List<MyUser> getUsers() {
         return userRepository.findAll();
     }
 

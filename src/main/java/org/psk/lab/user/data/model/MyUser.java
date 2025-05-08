@@ -6,7 +6,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class User {
+@Table(name = "users")
+public class MyUser {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID uuid;
@@ -14,13 +15,14 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
+    @Enumerated(EnumType.STRING)
     private Role role;
     private Integer version;
 
-    public User() {
+    public MyUser() {
     }
 
-    public User(UUID uuid, String email, String password, Integer version, Role role) {
+    public MyUser(UUID uuid, String email, String password, Integer version, Role role) {
         this.uuid = uuid;
         this.email = email;
         this.password = password;
@@ -71,8 +73,8 @@ public class User {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(uuid, user.uuid) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && role == user.role && Objects.equals(version, user.version);
+        MyUser myUser = (MyUser) o;
+        return Objects.equals(uuid, myUser.uuid) && Objects.equals(email, myUser.email) && Objects.equals(password, myUser.password) && role == myUser.role && Objects.equals(version, myUser.version);
     }
 
     @Override
