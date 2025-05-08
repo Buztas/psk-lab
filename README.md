@@ -71,6 +71,8 @@ docker system prune -a
    - **Connection tab**:  
      - Hostname/Address: `springboot_postgres`  
      - Port: `5432`
+     - Username: `root`
+     - Password: `root@111`
 
 ---
 
