@@ -1,10 +1,10 @@
-# 🚀 Project Setup Guide
+# Project Setup Guide
 
 This guide will walk you through setting up your environment, running the database, and managing Docker containers.
 
 ---
 
-## 🛠️ Step 1: Set Environment Variables
+## 1: Set Environment Variables
 
 1. In **IntelliJ**, next to the green "Run" button, click the button with **three dots (`...`)**.
 2. Click **"Edit Configurations"**.
@@ -18,7 +18,7 @@ This guide will walk you through setting up your environment, running the databa
 
 ---
 
-## 🐘 Step 2: Create the PostgreSQL Database
+## 2: Create the PostgreSQL Database
 
 1. Run the following command in your terminal:
 
@@ -34,7 +34,7 @@ This guide will walk you through setting up your environment, running the databa
 
 ---
 
-## 🛑 Step 3: Stop or Delete Containers
+## 3: Stop or Delete Containers
 
 ### To **stop** the containers:
 
@@ -54,7 +54,7 @@ docker system prune -a
 
 > ⚠️ **Note for Windows users**: Docker desktop has the, stop and delete buttons near the containers.
 
-## 📊 Step 4: Monitor the Database (pgAdmin)
+## 4: Monitor the Database (pgAdmin)
 
 1. Go to [http://localhost:5050/browser](http://localhost:5050/browser)  
    *(or open Docker Desktop and click the redirect icon)*
@@ -73,3 +73,7 @@ docker system prune -a
      - Port: `5432`
 
 ---
+
+ ## 5: To access swagger
+
+ Go to: localhost:{your_port}/swagger-ui/index.html
