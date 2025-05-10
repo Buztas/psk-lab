@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.psk.lab.menuComponent.domain.entities.interfaces.Stockable;
 import org.psk.lab.menuComponent.helper.enums.ItemType;
 
 import java.math.BigDecimal;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MenuItem {
+public class MenuItem implements Stockable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "menu_item_id", updatable = false, nullable = false)

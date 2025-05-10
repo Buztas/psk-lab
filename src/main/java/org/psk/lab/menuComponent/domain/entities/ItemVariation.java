@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.psk.lab.menuComponent.domain.entities.interfaces.Stockable;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ItemVariation {
+public class ItemVariation implements Stockable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "item_variation_id", updatable = false, nullable = false)
