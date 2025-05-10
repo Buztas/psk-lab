@@ -1,12 +1,20 @@
 package org.psk.lab.order.data.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.*;
 
 @Entity
 @Table(name = "order_item")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrderItem {
 
     @Id
@@ -36,78 +44,4 @@ public class OrderItem {
 //    )
 //    private Set<ItemVariation> chosenVariations = new HashSet<>();
 
-    public OrderItem() {
-    }
-
-    public OrderItem(Order order, int quantity, BigDecimal totalPrice) {
-        this.order = order;
-        this.quantity = quantity;
-        this.totalPrice = totalPrice;
-    }
-
-    public UUID getOrderItemId() {
-        return orderItemId;
-    }
-
-    public void setOrderItemId(UUID orderItemId) {
-        this.orderItemId = orderItemId;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-//    public MenuItem getMenuItem(){
-//        return menuItem;
-//    }
-//
-//    public void setMenuItem(MenuItem menuItem) {
-//        this.menuItem = menuItem;
-//    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrderItem orderItem)) return false;
-        if (this.orderItemId == null || orderItem.orderItemId == null) {
-            return false;
-        }
-        return orderItemId.equals(orderItem.orderItemId);
-    }
-
-    @Override
-    public int hashCode() {
-        return orderItemId != null ? orderItemId.hashCode() : getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "OrderItem{" +
-                "orderItemId=" + orderItemId +
-                ", orderId=" + (order != null ? order.getOrderId() : "null") +
-                // ", menuItemId=" + (menuItem != null ? menuItem.getMenuItemId() : "null") +
-                ", quantity=" + quantity +
-                ", totalPrice=" + totalPrice +
-                '}';
-    }
 }
