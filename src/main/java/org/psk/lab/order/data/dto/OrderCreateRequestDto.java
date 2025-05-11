@@ -15,7 +15,7 @@ import java.util.UUID;
 public class OrderCreateRequestDto {
 
     @NotNull(message = "User ID cannot be null.")
-    private UUID userID;
+    private UUID userId;
 
     @NotEmpty(message = "Order must contain at least one item.")
     @Valid
