@@ -24,5 +24,5 @@ public class OrderViewDto {
     private StatusType status;
     private BigDecimal totalAmount;
     private List<OrderItemViewDto> items = new ArrayList<>();
-    private int version;
+    private Integer version;
 }

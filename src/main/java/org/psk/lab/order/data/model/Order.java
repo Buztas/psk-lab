@@ -41,6 +41,6 @@ public class Order {
     private BigDecimal totalAmount;
 
     @Version
-    private int version;
+    private Integer version;
 
 }

@@ -3,6 +3,7 @@ package org.psk.lab.order.rest;
 
 import jakarta.validation.Valid;
 import org.psk.lab.order.data.dto.OrderCreateRequestDto;
+import org.psk.lab.order.data.dto.OrderStatusUpdateRequestDto;
 import org.psk.lab.order.data.dto.OrderViewDto;
 import org.psk.lab.order.data.model.Order;
 import org.psk.lab.order.service.OrderService;
@@ -37,7 +38,7 @@ public class OrderController {
         } // catch more specific exceptions later
     }
 
-    @GetMapping
+    @GetMapping("/{orderId}")
     public ResponseEntity<OrderViewDto> getOrderById(@Valid @PathVariable UUID orderId) {
         Optional<OrderViewDto> orderDtoOptional = orderService.getOrderById(orderId);
 
@@ -45,4 +46,24 @@ public class OrderController {
                 .map(dto -> ResponseEntity.ok(dto))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<?> updateOrderStatus (
+            @PathVariable UUID orderId,
+            @Valid @RequestBody OrderStatusUpdateRequestDto orderStatusUpdateRequestDto) {
+        try {
+            OrderViewDto updatedOrder = orderService.updateOrderStatus(orderId, orderStatusUpdateRequestDto);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (RuntimeException e) {
+            System.err.println("Error updating order status for order ID " + orderId + ": " + e.getMessage());
+
+            if (e.getMessage() != null && e.getMessage().contains("Order not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            } else if (e.getMessage() != null && e.getMessage().contains("version mismatch")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating order status.");
+        }
+    }
+
 }

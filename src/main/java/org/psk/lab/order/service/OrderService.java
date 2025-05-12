@@ -1,15 +1,13 @@
 package org.psk.lab.order.service;
 
 import jakarta.transaction.Transactional;
-import org.psk.lab.order.data.dto.OrderCreateRequestDto;
-import org.psk.lab.order.data.dto.OrderItemRequestDto;
-import org.psk.lab.order.data.dto.OrderItemViewDto;
-import org.psk.lab.order.data.dto.OrderViewDto;
+import org.psk.lab.order.data.dto.*;
 import org.psk.lab.order.data.model.Order;
 import org.psk.lab.order.data.model.OrderItem;
 import org.psk.lab.order.data.model.StatusType;
 import org.psk.lab.order.data.repository.OrderItemRepository;
 import org.psk.lab.order.data.repository.OrderRepository;
+import org.psk.lab.order.exception.OrderNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -81,8 +79,13 @@ public class OrderService {
             //BigDecimal lineItemTotalPrice = menuItemPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity()));
             //orderItem.setTotalPrice(lineItemTotalPrice);
 
+            //delete these 3 lines after testing
+            BigDecimal mockMenuItemPrice = new BigDecimal("5.00");
+            BigDecimal lineItemTotalPrice = mockMenuItemPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity()));
+            orderItem.setTotalPrice(lineItemTotalPrice);
+
             processedOrderItems.add(orderItem);
-            //totalOrderAmount = totalOrderAmount.add(lineItemTotalPrice);
+            totalOrderAmount = totalOrderAmount.add(lineItemTotalPrice);
         }
 
         order.setTotalAmount(totalOrderAmount);
@@ -105,6 +108,45 @@ public class OrderService {
 
         return orderRepository.findById(orderId).map(this::mapOrderToOrderViewDto);
     }
+
+    @Transactional
+    public OrderViewDto updateOrderStatus(UUID orderId, OrderStatusUpdateRequestDto requestDto) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("Order ID cannot be null.");
+        }
+        if (requestDto == null || requestDto.getNewStatus() == null || requestDto.getVersion() == null) {
+            throw new IllegalArgumentException("Request dto, new status, version cannot be null.");
+        }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
+
+        if (!order.getVersion().equals(requestDto.getVersion())) {
+            throw new RuntimeException(
+                    "Order update failed due to a version mismatch. Expected version: " +
+                    requestDto.getVersion() + ", but current version is: " + order.getVersion() + "." +
+                    " Please refresh and try again."
+            );
+        }
+
+        StatusType newStatusEnum;
+        try {
+            newStatusEnum = StatusType.valueOf(requestDto.getNewStatus().trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status value provided: '" + requestDto.getNewStatus() +
+                    "'. Valid statuses are: " + List.of(StatusType.values()), e);
+        }
+
+        //TODO: isValidStatusTransition
+
+        order.setStatus(newStatusEnum);
+
+        Order savedOrder = orderRepository.save(order);
+
+        return mapOrderToOrderViewDto(savedOrder);
+    }
+
+
 
     private OrderViewDto mapOrderToOrderViewDto(Order order) {
         OrderViewDto dto = new OrderViewDto();
@@ -138,4 +180,6 @@ public class OrderService {
 
         return itemDto;
     }
+
+
 }
