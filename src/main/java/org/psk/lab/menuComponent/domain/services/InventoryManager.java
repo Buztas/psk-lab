@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.psk.lab.menuComponent.domain.entities.interfaces.Stockable;
 import org.psk.lab.menuComponent.helper.enums.StockUpdateType;
+import org.psk.lab.menuComponent.helper.exceptions.OutOfStockException;
+import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
 import org.psk.lab.menuComponent.repository.ItemVariationRepository;
 import org.psk.lab.menuComponent.repository.MenuItemRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,17 +35,24 @@ public class InventoryManager {
             int qty,
             StockUpdateType type
     ) {
-        T entity = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Entity not found"));
+        if (qty <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive: " + qty);
+        }
 
-        if (type == StockUpdateType.RESERVE_QUANTITY) {
-            if (entity.getStock() < qty) {
-                // todo handle properly later
-                throw new IllegalArgumentException("Not enough stock available");
+        T entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Stockable entity not found with id: " + id)
+                );
+
+        switch(type){
+            case RESERVE_QUANTITY -> {
+                if (entity.getStock() < qty) {
+                    throw new OutOfStockException(entity.getClass().getSimpleName(), entity.getStock(), qty, id);
+                }
+                entity.setStock(entity.getStock() - qty);
             }
-            entity.setStock(entity.getStock() - qty);
-        } else if (type == StockUpdateType.RELEASE_QUANTITY) {
-            entity.setStock(entity.getStock() + qty);
+            case RELEASE_QUANTITY -> entity.setStock(entity.getStock() + qty);
+            default -> throw new IllegalArgumentException("Invalid stock update type: " + type);
         }
 
         repository.save(entity);

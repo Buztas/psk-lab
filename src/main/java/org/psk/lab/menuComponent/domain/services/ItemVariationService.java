@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.psk.lab.menuComponent.api.dto.ItemVariationDto;
 import org.psk.lab.menuComponent.domain.entities.ItemVariation;
+import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
 import org.psk.lab.menuComponent.helper.mappers.MenuMapper;
 import org.psk.lab.menuComponent.repository.ItemVariationRepository;
 import org.springframework.data.domain.Page;
@@ -24,18 +25,19 @@ public class ItemVariationService {
     }
 
     public ItemVariationDto getById(UUID id) {
-        return itemVariationRepository.findById(id)
-                .map(menuMapper::variationToDto)
-                .orElse(null);
+        ItemVariation itemVariation = itemVariationRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("ItemVariation not found with id: " + id)
+                );
+        return menuMapper.variationToDto(itemVariation);
     }
 
     @Transactional
     public ItemVariationDto create(ItemVariationDto itemVariationDto) {
-        ItemVariation itemVariation = menuMapper.variationToEntity(itemVariationDto);
-        if(itemVariation.getId() != null) {
-            // todo: handle later, should never happen
-            itemVariation.setId(null);
+        if (itemVariationDto.id() != null) {
+            throw new IllegalArgumentException("ItemVariation ID should not be specified during creation");
         }
+        ItemVariation itemVariation = menuMapper.variationToEntity(itemVariationDto);
         return menuMapper.variationToDto(
                 itemVariationRepository.save(itemVariation)
         );
@@ -43,6 +45,9 @@ public class ItemVariationService {
 
     @Transactional
     public ItemVariationDto update(UUID id, ItemVariationDto itemVariationDto) {
+        if (!itemVariationRepository.existsById(id)) {
+            throw new ResourceNotFoundException("ItemVariation not found with id: " + id);
+        }
         ItemVariation itemVariation = menuMapper.variationToEntity(itemVariationDto);
         itemVariation.setId(id);
         return menuMapper.variationToDto(
@@ -52,6 +57,9 @@ public class ItemVariationService {
 
     @Transactional
     public void delete(UUID id) {
+        if (!itemVariationRepository.existsById(id)) {
+            throw new ResourceNotFoundException("ItemVariation not found with id: " + id);
+        }
         itemVariationRepository.deleteById(id);
     }
 }

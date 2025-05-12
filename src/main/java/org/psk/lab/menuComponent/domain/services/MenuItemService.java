@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.psk.lab.menuComponent.api.dto.MenuItemDto;
 import org.psk.lab.menuComponent.domain.entities.MenuItem;
+import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
 import org.psk.lab.menuComponent.helper.mappers.MenuMapper;
 import org.psk.lab.menuComponent.repository.MenuItemRepository;
 import org.springframework.data.domain.Page;
@@ -15,43 +16,50 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MenuItemService {
-    private final MenuItemRepository menuItemRepo;
+    private final MenuItemRepository menuItemRepository;
     private final MenuMapper menuMapper;
 
     public Page<MenuItemDto> getAll(Pageable pageable){
-        return menuItemRepo.findAll(pageable)
+        return menuItemRepository.findAll(pageable)
                 .map(menuMapper::toDto);
     }
 
     public MenuItemDto getById(UUID id){
-        return menuItemRepo.findById(id)
-                .map(menuMapper::toDto)
-                .orElse(null);
+        MenuItem menuItem = menuItemRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("MenuItem not found with id: " + id)
+                );
+        return menuMapper.toDto(menuItem);
     }
 
     @Transactional
-    public MenuItemDto create(MenuItemDto menuItemDto){
-        MenuItem menuItem = menuMapper.toEntity(menuItemDto);
-        if (menuItem.getId() != null) {
-            // todo: handle later, should never happen
-            menuItem.setId(null);
+    public MenuItemDto create(MenuItemDto menuItemDto) {
+        if (menuItemDto.id() != null) {
+            throw new IllegalArgumentException("MenuItem ID should not be specified during creation");
         }
+        MenuItem menuItem = menuMapper.toEntity(menuItemDto);
         return menuMapper.toDto(
-                menuItemRepo.save(menuItem)
+                menuItemRepository.save(menuItem)
         );
     }
 
     @Transactional
     public MenuItemDto update(UUID id, MenuItemDto menuItemDto){
+        if (!menuItemRepository.existsById(id)) {
+            throw new ResourceNotFoundException("MenuItem not found with id: " + id);
+        }
         MenuItem menuItem = menuMapper.toEntity(menuItemDto);
         menuItem.setId(id);
         return menuMapper.toDto(
-                menuItemRepo.save(menuItem)
+                menuItemRepository.save(menuItem)
         );
     }
 
     @Transactional
     public void delete(UUID id){
-        menuItemRepo.deleteById(id);
+        if (!menuItemRepository.existsById(id)) {
+            throw new ResourceNotFoundException("MenuItem not found with id: " + id);
+        }
+        menuItemRepository.deleteById(id);
     }
 }
