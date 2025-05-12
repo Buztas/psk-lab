@@ -116,7 +116,7 @@ public class OrderService {
         dto.setTotalAmount(order.getTotalAmount());
         dto.setVersion(order.getVersion());
 
-        List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(order.getOrderId());
+        List<OrderItem> orderItems = orderItemRepository.findAllByOrderOrderId(order.getOrderId());
 
         if(!CollectionUtils.isEmpty(orderItems)) {
             dto.setItems(orderItems.stream()
@@ -132,9 +132,9 @@ public class OrderService {
     private OrderItemViewDto mapOrderItemToOrderItemViewDto(OrderItem orderItem) {
         OrderItemViewDto itemDto = new OrderItemViewDto();
         itemDto.setOderItemId(orderItem.getOrderItemId());
-        // TODO: integrate with menuitem, itemvariations
         itemDto.setQuantity(orderItem.getQuantity());
         itemDto.setItemTotalPrice(orderItem.getTotalPrice());
+        // TODO: integrate with menuitem, itemvariations
 
         return itemDto;
     }
