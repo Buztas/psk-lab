@@ -56,13 +56,8 @@ public class OrderService {
             //BigDecimal lineItemTotalPrice = menuItemPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity()));
             //orderItem.setTotalPrice(lineItemTotalPrice);
 
-            //mock value for testing
-            BigDecimal mockMenuItemPrice = new BigDecimal("5.00");
-            BigDecimal lineItemTotalPrice = mockMenuItemPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity()));
-            orderItem.setTotalPrice(lineItemTotalPrice);
-
             processedOrderItems.add(orderItem);
-            totalOrderAmount = totalOrderAmount.add(lineItemTotalPrice);
+            //totalOrderAmount = totalOrderAmount.add(lineItemTotalPrice);
         }
 
         order.setTotalAmount(totalOrderAmount);
@@ -109,7 +104,6 @@ public class OrderService {
             throw new InvalidStatusValueException("Invalid status value provided: '" + requestDto.getNewStatus() +
                     "'. Valid statuses are: " + List.of(StatusType.values()), e);
         }
-        //TODO: isValidStatusTransition ?
         order.setStatus(newStatusEnum);
         Order savedOrder = orderRepository.save(order);
 
