@@ -30,16 +30,17 @@ public class Order {
 //    @JoinColumn(nullable = false)
 //    private MyUser myUser;
 
-    @Column(nullable = false)
+    @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
 
+    @Column(name = "pickup_time")
     private LocalDateTime pickupTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private StatusType status;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
     @Version

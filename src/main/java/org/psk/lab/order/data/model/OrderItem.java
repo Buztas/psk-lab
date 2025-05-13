@@ -30,10 +30,10 @@ public class OrderItem {
 //    @JoinColumn(name = "menu_item_id", nullable = false)
 //    private MenuItem menuItem;
 
-    @Column(nullable = false)
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
 //    @ManyToMany

@@ -15,7 +15,7 @@ import java.util.UUID;
 @ToString
 public class OrderItemViewDto {
 
-    private UUID oderItemId;
+    private UUID orderItemId;
     private UUID menuItemId;
     private String menuItemName;
     private int quantity;

@@ -2,80 +2,60 @@ package org.psk.lab.order.rest;
 
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.psk.lab.order.data.dto.OrderCreateRequestDto;
 import org.psk.lab.order.data.dto.OrderStatusUpdateRequestDto;
+import org.psk.lab.order.data.dto.OrderSummaryDto;
 import org.psk.lab.order.data.dto.OrderViewDto;
-import org.psk.lab.order.data.model.Order;
 import org.psk.lab.order.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
 
-    @Autowired
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
-
     @PostMapping
-    public ResponseEntity<?> createOrder(@Valid @RequestBody OrderCreateRequestDto orderCreateRequestDto) {
-        try {
-            OrderViewDto createdOrder = orderService.createOrder(orderCreateRequestDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating order");
-        } // catch more specific exceptions later
+    public ResponseEntity<OrderViewDto> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto) {
+        OrderViewDto createdOrderDto = orderService.createOrder(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderViewDto> getOrderById(@Valid @PathVariable UUID orderId) {
-        Optional<OrderViewDto> orderDtoOptional = orderService.getOrderById(orderId);
-
-        return orderDtoOptional
+    public ResponseEntity<OrderViewDto> getOrderById(@PathVariable UUID orderId) {
+        return orderService.getOrderById(orderId)
                 .map(dto -> ResponseEntity.ok(dto))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{orderId}/status")
-    public ResponseEntity<?> updateOrderStatus (
-            @PathVariable UUID orderId,
-            @Valid @RequestBody OrderStatusUpdateRequestDto orderStatusUpdateRequestDto) {
-        try {
-            OrderViewDto updatedOrder = orderService.updateOrderStatus(orderId, orderStatusUpdateRequestDto);
-            return ResponseEntity.ok(updatedOrder);
-        } catch (RuntimeException e) {
-            System.err.println("Error updating order status for order ID " + orderId + ": " + e.getMessage());
+    @GetMapping
+    public ResponseEntity<Page<OrderSummaryDto>> getAllOrders(
+            @PageableDefault(size = 20, sort = "orderDate") Pageable pageable
+    ) {
+        Page<OrderSummaryDto> orderPage = orderService.getAllOrders(pageable);
+        return ResponseEntity.ok(orderPage);
+    }
 
-            if (e.getMessage() != null && e.getMessage().contains("Order not found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-            } else if (e.getMessage() != null && e.getMessage().contains("version mismatch")) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-            }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating order status.");
-        }
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<OrderViewDto> updateOrderStatus (
+            @PathVariable UUID orderId,
+            @Valid @RequestBody OrderStatusUpdateRequestDto requestDto) {
+        OrderViewDto updatedOrderDto = orderService.updateOrderStatus(orderId, requestDto);
+        return ResponseEntity.ok(updatedOrderDto);
     }
 
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(@PathVariable UUID orderId) {
-        try {
-            orderService.deleteOrder(orderId);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (RuntimeException e) {
-            System.err.println("Error deleting order: " + orderId + ": " + e.getMessage());
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        orderService.deleteOrder(orderId);
+        return ResponseEntity.noContent().build();
     }
 }
