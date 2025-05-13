@@ -29,7 +29,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> createOrder(@Valid @RequestBody OrderCreateRequestDto orderCreateRequestDto) {
         try {
-            Order createdOrder = orderService.createOrder(orderCreateRequestDto);
+            OrderViewDto createdOrder = orderService.createOrder(orderCreateRequestDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -66,4 +66,16 @@ public class OrderController {
         }
     }
 
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID orderId) {
+        try {
+            orderService.deleteOrder(orderId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            System.err.println("Error deleting order: " + orderId + ": " + e.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
 }

@@ -7,6 +7,7 @@ import org.psk.lab.order.data.model.OrderItem;
 import org.psk.lab.order.data.model.StatusType;
 import org.psk.lab.order.data.repository.OrderItemRepository;
 import org.psk.lab.order.data.repository.OrderRepository;
+import org.psk.lab.order.exception.OptimisticLockingConflictException;
 import org.psk.lab.order.exception.OrderNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,8 +33,8 @@ public class OrderService {
     @Autowired
     public OrderService(OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository
-                        // MenuItemRepository menuItemRepository, // TODO
-                        // UserRepository userRepository // TODO
+                        // MenuItemRepository menuItemRepository,
+                        // UserRepository userRepository
                         ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
@@ -42,7 +43,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order createOrder(OrderCreateRequestDto requestDto) {
+    public OrderViewDto createOrder(OrderCreateRequestDto requestDto) {
         if (requestDto.getUserId() == null) {
             throw new IllegalArgumentException("User ID is required");
         }
@@ -97,7 +98,7 @@ public class OrderService {
         }
         orderItemRepository.saveAll(processedOrderItems);
 
-        return savedOrder;
+        return mapOrderToOrderViewDto(savedOrder);
     }
 
     @Transactional
@@ -122,7 +123,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
 
         if (!order.getVersion().equals(requestDto.getVersion())) {
-            throw new RuntimeException(
+            throw new OptimisticLockingConflictException(
                     "Order update failed due to a version mismatch. Expected version: " +
                     requestDto.getVersion() + ", but current version is: " + order.getVersion() + "." +
                     " Please refresh and try again."
@@ -137,7 +138,7 @@ public class OrderService {
                     "'. Valid statuses are: " + List.of(StatusType.values()), e);
         }
 
-        //TODO: isValidStatusTransition
+        //TODO: isValidStatusTransition ?
 
         order.setStatus(newStatusEnum);
 
@@ -146,7 +147,18 @@ public class OrderService {
         return mapOrderToOrderViewDto(savedOrder);
     }
 
+    @Transactional
+    public void deleteOrder(UUID orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("Order ID cannot be null for deletion.");
+        }
 
+        if (!orderRepository.existsById(orderId)) {
+            throw new OrderNotFoundException("Order not found with ID: " + orderId);
+        }
+
+        orderRepository.deleteById(orderId);
+    }
 
     private OrderViewDto mapOrderToOrderViewDto(Order order) {
         OrderViewDto dto = new OrderViewDto();
