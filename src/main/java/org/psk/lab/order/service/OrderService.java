@@ -2,6 +2,10 @@ package org.psk.lab.order.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.psk.lab.menuComponent.domain.entities.MenuItem;
+import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
+import org.psk.lab.menuComponent.repository.ItemVariationRepository;
+import org.psk.lab.menuComponent.repository.MenuItemRepository;
 import org.psk.lab.order.data.dto.*;
 import org.psk.lab.order.data.model.Order;
 import org.psk.lab.order.data.model.OrderItem;
@@ -12,6 +16,8 @@ import org.psk.lab.order.exception.InvalidStatusValueException;
 import org.psk.lab.order.exception.OptimisticLockingConflictException;
 import org.psk.lab.order.exception.OrderNotFoundException;
 import org.psk.lab.order.mapper.OrderMapper;
+import org.psk.lab.user.data.model.MyUser;
+import org.psk.lab.user.data.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,16 +35,18 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    // private final MenuItemRepository menuItemRepository; // TODO: Inject when MenuItem component is integrated
-    // private final UserRepository userRepository; // TODO: Inject when User component is integrated
-    // private  final ItemVariationRepository itemVariationRepository;
+    private final MenuItemRepository menuItemRepository;
+    private final UserRepository userRepository;
+    private  final ItemVariationRepository itemVariationRepository;
     private final OrderMapper orderMapper;
 
 
     @Transactional
     public OrderViewDto createOrder(OrderCreateRequestDto requestDto) {
         Order order = new Order();
-        // TODO: set user
+        MyUser myUser = userRepository.findById(requestDto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        order.setMyUser(myUser);
         order.setOrderDate(LocalDateTime.now());
         order.setPickupTime(null);
         order.setStatus(StatusType.PENDING);
@@ -46,18 +54,19 @@ public class OrderService {
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
 
         for (OrderItemRequestDto itemDto : requestDto.getItems()) {
-            //MenuItem menuItem = menuItemRepository.findById(itemDto.getMenuItemId());
+            MenuItem menuItem = menuItemRepository.findById(itemDto.getMenuItemId())
+                    .orElseThrow(() -> new ResourceNotFoundException("MenuItem not found" + itemDto.getMenuItemId()));
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            //orderItem.setMenuItem(menuItem);
+            orderItem.setMenuItem(menuItem);
             orderItem.setQuantity(itemDto.getQuantity());
-            //BigDecimal menuItemPrice = menuItem.getPrice();
-            //BigDecimal lineItemTotalPrice = menuItemPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity()));
-            //orderItem.setTotalPrice(lineItemTotalPrice);
+            BigDecimal menuItemPrice = menuItem.getPrice();
+            BigDecimal lineItemTotalPrice = menuItemPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity()));
+            orderItem.setTotalPrice(lineItemTotalPrice);
 
             processedOrderItems.add(orderItem);
-            //totalOrderAmount = totalOrderAmount.add(lineItemTotalPrice);
+            totalOrderAmount = totalOrderAmount.add(lineItemTotalPrice);
         }
 
         order.setTotalAmount(totalOrderAmount);

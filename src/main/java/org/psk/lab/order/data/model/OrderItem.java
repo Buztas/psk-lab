@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.psk.lab.menuComponent.domain.entities.ItemVariation;
+import org.psk.lab.menuComponent.domain.entities.MenuItem;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -26,9 +28,9 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-//    @ManyToOne(optional = false)
-//    @JoinColumn(name = "menu_item_id", nullable = false)
-//    private MenuItem menuItem;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "menu_item_id", nullable = false)
+    private MenuItem menuItem;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
@@ -36,12 +38,12 @@ public class OrderItem {
     @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
-//    @ManyToMany
-//    @JoinTable(
-//            name = "order_item_variation",
-//            joinColumns = @JoinColumn(name = "order_item_id"),
-//            inverseJoinColumns = @JoinColumn(name = "item_variation_id")
-//    )
-//    private Set<ItemVariation> chosenVariations = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "order_item_variation",
+            joinColumns = @JoinColumn(name = "order_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_variation_id")
+    )
+    private Set<ItemVariation> chosenVariations = new HashSet<>();
 
 }

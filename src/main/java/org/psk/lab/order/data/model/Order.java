@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.psk.lab.user.data.model.MyUser;
 
 @Entity
 @Table(name = "\"order\"")
@@ -26,9 +27,9 @@ public class Order {
     @Column(name = "order_id", nullable = false, updatable = false)
     private UUID orderId;
 
-//    @ManyToOne
-//    @JoinColumn(nullable = false)
-//    private MyUser myUser;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private MyUser myUser;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
