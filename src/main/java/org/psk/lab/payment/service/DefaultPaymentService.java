@@ -4,7 +4,10 @@ import org.psk.lab.payment.data.dto.PaymentDTO;
 import org.psk.lab.payment.data.model.Payment;
 import org.psk.lab.payment.data.model.PaymentStatus;
 import org.psk.lab.payment.data.repository.PaymentRepository;
+import org.psk.lab.payment.exception.PaymentNotFoundException;
+import org.psk.lab.payment.util.PaymentMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,21 +23,16 @@ public class DefaultPaymentService implements PaymentService {
     }
 
     @Override
+    @Transactional
     public UUID createPayment(PaymentDTO dto) {
-        Payment payment = new Payment();
-        payment.setOrder_id(UUID.fromString(dto.orderId()));
-        payment.setAmount(dto.amount());
-        payment.setPayment_status(PaymentStatus.PENDING);
-        payment.setPayment_date(LocalDateTime.now());
-        payment.setTransaction_id("pending"); // or empty string
-
-        repository.save(payment);
-        return payment.getId();
+        Payment payment = PaymentMapper.toEntity(dto);
+        return repository.save(payment).getId();
     }
 
     @Override
     public Payment getPayment(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Payment not found: " + id));
+        return repository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException(id));
     }
 
     @Override
@@ -43,25 +41,42 @@ public class DefaultPaymentService implements PaymentService {
     }
 
     @Override
+    @Transactional
     public String deletePayment(UUID id) {
         if (!repository.existsById(id)) {
-            return "Payment with ID " + id + " not found.";
+            throw new PaymentNotFoundException(id);
         }
         repository.deleteById(id);
-        return "Payment with ID " + id + " deleted.";
+        return "Payment with ID " + id + " was deleted successfully";
     }
 
     @Override
+    @Transactional
     public String updatePayment(UUID id, PaymentStatus status, String transactionId) {
-        Payment payment = getPayment(id);
-        payment.setPayment_status(status);
-        payment.setTransaction_id(transactionId);
-        payment.setPayment_date(LocalDateTime.now());
+        Payment payment = repository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException(id));
+
+        validateStatusTransition(payment.getPaymentStatus(), status);
+
+        payment.setPaymentStatus(status);
+        payment.setTransactionId(transactionId);
+        payment.setPaymentDate(LocalDateTime.now());
+
         repository.save(payment);
-        return "Payment updated";
+        return "Payment with ID " + id + " was updated to status: " + status;
     }
 
-    private String generateTransactionId() {
-        return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+    private void validateStatusTransition(PaymentStatus currentStatus, PaymentStatus newStatus) {
+        if (currentStatus == PaymentStatus.COMPLETED || currentStatus == PaymentStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot change status from " + currentStatus + " to " + newStatus);
+        }
+
+        if (newStatus == PaymentStatus.PROCESSING && currentStatus != PaymentStatus.PENDING) {
+            throw new IllegalStateException("Can only process payments from PENDING status");
+        }
+
+        if (newStatus == PaymentStatus.COMPLETED && currentStatus != PaymentStatus.PROCESSING) {
+            throw new IllegalStateException("Can only complete payments from PROCESSING status");
+        }
     }
 }

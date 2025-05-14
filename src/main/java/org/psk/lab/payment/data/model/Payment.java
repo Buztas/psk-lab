@@ -13,33 +13,33 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(nullable = false)
-    private UUID order_id;
+    private UUID orderId;
     /*
     @OneToOne
-    @JoinColumn(name = "order_id", referencedColumnName = "id", nullable = false)
-    private Order order_id;
+    @JoinColumn(nullable = false)
+    private Order orderId;
     */
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus payment_status;
+    private PaymentStatus paymentStatus;
     @Column(nullable = false)
-    private LocalDateTime payment_date;
+    private LocalDateTime paymentDate;
     @Column(nullable = false)
-    private String transaction_id;
+    private String transactionId;
 
     public Payment() {
     }
 
-    public Payment(UUID id, UUID order_id, BigDecimal amount, PaymentStatus payment_status,
-                   LocalDateTime payment_date, String transaction_id) {
+    public Payment(UUID id, UUID orderId, BigDecimal amount, PaymentStatus paymentStatus,
+                   LocalDateTime paymentDate, String transactionId) {
         this.id = id;
-        this.order_id = order_id;
+        this.orderId = orderId;
         this.amount = amount;
-        this.payment_status = payment_status;
-        this.payment_date = payment_date;
-        this.transaction_id = transaction_id;
+        this.paymentStatus = paymentStatus;
+        this.paymentDate = paymentDate;
+        this.transactionId = transactionId;
     }
 
     public UUID getId() {
@@ -50,12 +50,12 @@ public class Payment {
         this.id = id;
     }
 
-    public UUID getOrder_id() {
-        return order_id;
+    public UUID getOrderId() {
+        return orderId;
     }
 
-    public void setOrder_id(UUID order_id) {
-        this.order_id = order_id;
+    public void setOrderId(UUID orderId) {
+        this.orderId = orderId;
     }
 
     public BigDecimal getAmount() {
@@ -66,28 +66,28 @@ public class Payment {
         this.amount = amount;
     }
 
-    public PaymentStatus getPayment_status() {
-        return payment_status;
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
     }
 
-    public void setPayment_status(PaymentStatus payment_status) {
-        this.payment_status = payment_status;
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
-    public LocalDateTime getPayment_date() {
-        return payment_date;
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
     }
 
-    public void setPayment_date(LocalDateTime payment_date) {
-        this.payment_date = payment_date;
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
-    public String getTransaction_id() {
-        return transaction_id;
+    public String getTransactionId() {
+        return transactionId;
     }
 
-    public void setTransaction_id(String transaction_id) {
-        this.transaction_id = transaction_id;
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
     }
 
     @Override
@@ -95,27 +95,27 @@ public class Payment {
         if (o == null || getClass() != o.getClass()) return false;
         Payment payment = (Payment) o;
         return Objects.equals(id, payment.id) &&
-                Objects.equals(order_id, payment.order_id) &&
+                Objects.equals(orderId, payment.orderId) &&
                 Objects.equals(amount, payment.amount) &&
-                payment_status == payment.payment_status &&
-                Objects.equals(payment_date, payment.payment_date) &&
-                Objects.equals(transaction_id, payment.transaction_id);
+                paymentStatus == payment.paymentStatus &&
+                Objects.equals(paymentDate, payment.paymentDate) &&
+                Objects.equals(transactionId, payment.transactionId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, order_id, amount, payment_status, payment_date, transaction_id);
+        return Objects.hash(id, orderId, amount, paymentStatus, paymentDate, transactionId);
     }
 
     @Override
     public String toString() {
         return "Payment{" +
                 "id=" + id +
-                ", order_id=" + order_id +
+                ", orderId=" + orderId +
                 ", amount=" + amount +
-                ", payment_status=" + payment_status +
-                ", payment_date=" + payment_date +
-                ", transaction_id='" + transaction_id + '\'' +
+                ", paymentStatus=" + paymentStatus +
+                ", paymentDate=" + paymentDate +
+                ", transactionId='" + transactionId + '\'' +
                 '}';
     }
 }

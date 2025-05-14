@@ -5,49 +5,56 @@ import org.psk.lab.payment.data.dto.PaymentDTO;
 import org.psk.lab.payment.data.model.Payment;
 import org.psk.lab.payment.data.model.PaymentStatus;
 import org.psk.lab.payment.service.PaymentService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/payment")
+@RequestMapping("/api/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
     private final PaymentService paymentService;
 
-    // Create a new payment (when an order is placed)
     @PostMapping
     public ResponseEntity<UUID> createPayment(@RequestBody PaymentDTO dto) {
-        UUID paymentId = paymentService.createPayment(dto);
-        return ResponseEntity.ok(paymentId);
+        try {
+            UUID paymentId = paymentService.createPayment(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(paymentId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
-    // Get a single payment by ID
     @GetMapping("/{id}")
     public ResponseEntity<Payment> getPayment(@PathVariable UUID id) {
         return ResponseEntity.ok(paymentService.getPayment(id));
     }
 
-    // Get all payments
     @GetMapping
     public ResponseEntity<List<Payment>> getAllPayments() {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
-    // Update payment status and transaction ID
-    @PatchMapping("/{id}")
-    public ResponseEntity<String> updatePayment(
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<String> updatePaymentStatus(
             @PathVariable UUID id,
             @RequestParam("status") PaymentStatus status,
-            @RequestParam("transactionId") String transactionId
+            @RequestParam(value = "transactionId", required = false) String transactionId
     ) {
-        return ResponseEntity.ok(paymentService.updatePayment(id, status, transactionId));
+        try {
+            String result = paymentService.updatePayment(id, status,
+                    transactionId != null ? transactionId : "txn_" + UUID.randomUUID().toString().substring(0, 12));
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
-    // Delete a payment
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePayment(@PathVariable UUID id) {
         return ResponseEntity.ok(paymentService.deletePayment(id));
