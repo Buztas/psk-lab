@@ -37,7 +37,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final MenuItemRepository menuItemRepository;
     private final UserRepository userRepository;
-    private  final ItemVariationRepository itemVariationRepository;
+    private final ItemVariationRepository itemVariationRepository;
     private final OrderMapper orderMapper;
 
 
