@@ -1,15 +1,11 @@
 package org.psk.lab.user.data.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import org.psk.lab.user.data.model.Role;
 
-public record UserDTO(@NotNull String email,
+public record UserDTO(@NotNull @Email String email,
                       @NotNull String password,
-                      @JsonProperty Role roleType,
-                      Integer version) {
-    public UserDTO {
-        if (roleType == null) roleType = Role.CUSTOMER;
-        if (version == null) version = 1;
-    }
+                      @JsonProperty Role roleType) {
 }

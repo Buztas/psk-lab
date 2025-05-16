@@ -1,5 +1,7 @@
 package org.psk.lab.menuComponent.api.endpoints;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.psk.lab.menuComponent.api.dto.ItemVariationDto;
@@ -10,13 +12,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/menu")
 @RequiredArgsConstructor
+@Tag(name = "Menu", description = "Endpoints regarding menu management")
+@Validated
 public class MenuController {
     private final ItemVariationService itemVariationService;
     private final MenuItemService menuItemService;

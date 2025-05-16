@@ -1,11 +1,10 @@
 package org.psk.lab.user.service;
 
-import io.jsonwebtoken.InvalidClaimException;
 import org.psk.lab.mapper.UserMapper;
 import org.psk.lab.user.data.dto.UserDTO;
-import org.psk.lab.user.data.response.LoginResponse;
-import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.repository.UserRepository;
+import org.psk.lab.user.data.response.LoginResponse;
+import org.psk.lab.user.data.response.UserResponse;
 import org.psk.lab.user.exception.InvalidUserCredentials;
 import org.psk.lab.user.exception.UserAlreadyExistsException;
 import org.psk.lab.user.util.JwtUtil;
@@ -30,19 +29,19 @@ public class DefaultAuthService implements AuthService {
     }
 
     @Override
-    public MyUser register(UserDTO userDTO) {
+    public UserResponse register(UserDTO userDTO) {
         try {
             var existingUser = userRepository.findByEmail(userDTO.email());
             if(existingUser.isEmpty()) {
                 var encryptedUserDTO = new UserDTO(
                         userDTO.email(),
                         passwordEncoder.encode(userDTO.password()),
-                        userDTO.roleType(),
-                        userDTO.version()
+                        userDTO.roleType()
                 );
                 var user = userMapper.toEntity(encryptedUserDTO);
                 LOGGER.info("User registered successfully: {}", user);
-                return userRepository.save(user);
+                userRepository.save(user);
+                return userMapper.toUserResponse(user);
             }
             LOGGER.info("User already exists: {}", userDTO.email());
             throw new UserAlreadyExistsException(userDTO.email());
