@@ -1,6 +1,5 @@
 package org.psk.lab.user.service;
 
-import org.psk.lab.mapper.UserMapper;
 import org.psk.lab.user.data.repository.UserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
