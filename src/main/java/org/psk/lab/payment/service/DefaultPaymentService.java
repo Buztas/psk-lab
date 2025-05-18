@@ -5,7 +5,7 @@ import org.psk.lab.payment.data.model.Payment;
 import org.psk.lab.payment.data.model.PaymentStatus;
 import org.psk.lab.payment.data.repository.PaymentRepository;
 import org.psk.lab.payment.exception.PaymentNotFoundException;
-import org.psk.lab.payment.util.PaymentMapper;
+import org.psk.lab.payment.mapper.PaymentMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,15 +17,18 @@ import java.util.UUID;
 public class DefaultPaymentService implements PaymentService {
 
     private final PaymentRepository repository;
+    private final PaymentMapper mapper;
 
-    public DefaultPaymentService(PaymentRepository repository) {
+    public DefaultPaymentService(PaymentRepository repository, PaymentMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
+
 
     @Override
     @Transactional
     public UUID createPayment(PaymentDTO dto) {
-        Payment payment = PaymentMapper.toEntity(dto);
+        Payment payment = mapper.toEntity(dto);
         return repository.save(payment).getId();
     }
 
