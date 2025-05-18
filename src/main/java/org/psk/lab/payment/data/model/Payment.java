@@ -14,11 +14,6 @@ public class Payment {
     private UUID id;
     @Column(nullable = false)
     private UUID orderId;
-    /*
-    @OneToOne
-    @JoinColumn(nullable = false)
-    private Order orderId;
-    */
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)

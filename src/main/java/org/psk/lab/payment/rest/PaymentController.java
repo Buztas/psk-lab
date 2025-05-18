@@ -1,5 +1,8 @@
 package org.psk.lab.payment.rest;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.psk.lab.payment.data.dto.PaymentDTO;
 import org.psk.lab.payment.data.model.Payment;
@@ -13,16 +16,23 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
 
+
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
+@Tag(name = "Payment", description = "Endpoints regarding payment management")
 public class PaymentController {
 
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<UUID> createPayment(@RequestBody PaymentDTO dto) {
+    public ResponseEntity<UUID> createPayment(@Valid @RequestBody PaymentDTO dto) {
         try {
+            if (dto.orderId() == null || dto.amount() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order ID and amount are required");
+            }
+
             UUID paymentId = paymentService.createPayment(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(paymentId);
         } catch (Exception e) {

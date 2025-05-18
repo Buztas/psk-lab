@@ -29,6 +29,18 @@ public class DefaultPaymentService implements PaymentService {
     @Transactional
     public UUID createPayment(PaymentDTO dto) {
         Payment payment = mapper.toEntity(dto);
+
+        // Set default values if not provided
+        if (payment.getPaymentStatus() == null) {
+            payment.setPaymentStatus(PaymentStatus.PENDING);
+        }
+        if (payment.getPaymentDate() == null) {
+            payment.setPaymentDate(LocalDateTime.now());
+        }
+        if (payment.getTransactionId() == null) {
+            payment.setTransactionId("txn_" + UUID.randomUUID().toString().substring(0, 12));
+        }
+
         return repository.save(payment).getId();
     }
 

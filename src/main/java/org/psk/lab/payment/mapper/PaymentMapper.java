@@ -6,6 +6,6 @@ import org.psk.lab.payment.data.model.Payment;
 
 @Mapper(componentModel = "spring")
 public interface PaymentMapper {
-    PaymentDTO toDto(Payment payment);
+    PaymentDTO toDto(Payment entity);
     Payment toEntity(PaymentDTO dto);
 }
