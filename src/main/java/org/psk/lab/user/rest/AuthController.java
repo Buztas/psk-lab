@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.psk.lab.user.data.dto.UserDTO;
 import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.response.LoginResponse;
+import org.psk.lab.user.data.response.UserResponse;
 import org.psk.lab.user.service.AuthService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +23,7 @@ public class AuthController {
 
     @Operation(summary = "Register a new user")
     @PostMapping("/register")
-    public MyUser createUser(@RequestBody @Valid UserDTO userDTO) {
+    public UserResponse register(@RequestBody @Valid UserDTO userDTO) {
         return authService.register(userDTO);
     }
 

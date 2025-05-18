@@ -17,12 +17,13 @@ public class MyUser {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private Integer version;
+    @Version
+    private int version;
 
     public MyUser() {
     }
 
-    public MyUser(UUID uuid, String email, String password, Integer version, Role role) {
+    public MyUser(UUID uuid, String email, String password, int version, Role role) {
         this.uuid = uuid;
         this.email = email;
         this.password = password;
@@ -54,11 +55,11 @@ public class MyUser {
         this.password = password;
     }
 
-    public Integer getVersion() {
+    public int getVersion() {
         return version;
     }
 
-    public void setVersion(Integer version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 
