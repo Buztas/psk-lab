@@ -3,6 +3,7 @@ package org.psk.lab.user.auth;
 import org.psk.lab.user.service.AuthDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,6 +40,11 @@ public class SecurityConfiguration {
                             "/swagger-resources/**",
                             "/webjars/**"
                     ).permitAll();
+                    registry.requestMatchers(HttpMethod.POST, "/api/orders").hasRole("CUSTOMER");
+                    registry.requestMatchers(HttpMethod.GET, "/api/orders/{orderId}").hasAnyRole("CUSTOMER", "ADMIN");
+                    registry.requestMatchers(HttpMethod.PUT, "/api/orders/**/status").hasAnyRole("EMPLOYEE", "ADMIN");
+                    registry.requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("ADMIN", "EMPLOYEE");
+                    registry.requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN");
                     registry.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

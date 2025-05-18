@@ -1,5 +1,6 @@
 package org.psk.lab.order.service;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.psk.lab.menuComponent.domain.entities.MenuItem;
@@ -20,6 +21,7 @@ import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -95,28 +97,27 @@ public class OrderService {
 
     @Transactional
     public OrderViewDto updateOrderStatus(UUID orderId, OrderStatusUpdateRequestDto requestDto) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
-
-        if (!order.getVersion().equals(requestDto.getVersion())) {
-            throw new OptimisticLockingConflictException(
-                    "Order update failed due to a version mismatch. Expected version: " +
-                    requestDto.getVersion() + ", but current version is: " + order.getVersion() + "." +
-                    " Please refresh and try again."
-            );
-        }
-
-        StatusType newStatusEnum;
         try {
-            newStatusEnum = StatusType.valueOf(requestDto.getNewStatus().trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new InvalidStatusValueException("Invalid status value provided: '" + requestDto.getNewStatus() +
-                    "'. Valid statuses are: " + List.of(StatusType.values()), e);
-        }
-        order.setStatus(newStatusEnum);
-        Order savedOrder = orderRepository.save(order);
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
 
-        return this.orderMapper.toOrderViewDto(savedOrder);
+            StatusType newStatusEnum;
+            try {
+                newStatusEnum = StatusType.valueOf(requestDto.getNewStatus().trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new InvalidStatusValueException("Invalid status value provided: '" + requestDto.getNewStatus() +
+                        "'. Valid statuses are: " + List.of(StatusType.values()), e);
+            }
+
+            order.setStatus(newStatusEnum);
+
+            Order savedOrder = orderRepository.save(order);
+
+            return this.orderMapper.toOrderViewDto(savedOrder);
+
+        } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
+            throw new OptimisticLockingConflictException("Order update failed due to a version conflict. Please refresh and try again.", e);
+        }
     }
 
     @Transactional
