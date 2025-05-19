@@ -114,7 +114,7 @@ public class OrderService {
             Order base = orderRepository.findById(orderId)
                     .orElseThrow(() -> new OrderNotFoundException("Order " + orderId + " not found"));
 
-            Order detached = Order.builder()
+            Order detached = Order.Builder.builder()
                     .orderId(orderId)
                     .version(requestDto.getVersion())
                     .status(newStatus)

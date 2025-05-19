@@ -1,22 +1,16 @@
 package org.psk.lab.order.data.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.psk.lab.menuComponent.domain.entities.ItemVariation;
 import org.psk.lab.menuComponent.domain.entities.MenuItem;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "order_item")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class OrderItem {
 
     @Id
@@ -46,4 +40,67 @@ public class OrderItem {
     )
     private Set<ItemVariation> chosenVariations = new HashSet<>();
 
+    // No-arg constructor
+    public OrderItem() {}
+
+    // All-args constructor
+    public OrderItem(UUID orderItemId, Order order, MenuItem menuItem, int quantity,
+                     BigDecimal totalPrice, Set<ItemVariation> chosenVariations) {
+        this.orderItemId = orderItemId;
+        this.order = order;
+        this.menuItem = menuItem;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
+        this.chosenVariations = chosenVariations;
+    }
+
+    // Getters and Setters
+
+    public UUID getOrderItemId() {
+        return orderItemId;
+    }
+
+    public void setOrderItemId(UUID orderItemId) {
+        this.orderItemId = orderItemId;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public MenuItem getMenuItem() {
+        return menuItem;
+    }
+
+    public void setMenuItem(MenuItem menuItem) {
+        this.menuItem = menuItem;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public Set<ItemVariation> getChosenVariations() {
+        return chosenVariations;
+    }
+
+    public void setChosenVariations(Set<ItemVariation> chosenVariations) {
+        this.chosenVariations = chosenVariations;
+    }
 }

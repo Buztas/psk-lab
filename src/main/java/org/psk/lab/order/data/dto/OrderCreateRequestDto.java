@@ -3,15 +3,11 @@ package org.psk.lab.order.data.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class OrderCreateRequestDto {
 
     @NotNull(message = "User ID cannot be null.")
@@ -21,4 +17,26 @@ public class OrderCreateRequestDto {
     @Valid
     private List<OrderItemRequestDto> items = new ArrayList<>();
 
+    public OrderCreateRequestDto() {}
+
+    public OrderCreateRequestDto(UUID userId, List<OrderItemRequestDto> items) {
+        this.userId = userId;
+        this.items = items;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    public List<OrderItemRequestDto> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItemRequestDto> items) {
+        this.items = items;
+    }
 }
