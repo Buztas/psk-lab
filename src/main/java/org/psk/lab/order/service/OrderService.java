@@ -3,6 +3,7 @@ package org.psk.lab.order.service;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.psk.lab.menuComponent.domain.entities.ItemVariation;
 import org.psk.lab.menuComponent.domain.entities.MenuItem;
 import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
 import org.psk.lab.menuComponent.repository.ItemVariationRepository;
@@ -26,10 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +48,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         order.setMyUser(myUser);
         order.setOrderDate(LocalDateTime.now());
-        order.setPickupTime(null);
+        order.setPickupTime(LocalDateTime.now().plusMinutes(10));
         order.setStatus(StatusType.PENDING);
         List<OrderItem> processedOrderItems = new ArrayList<>();
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
@@ -63,24 +61,32 @@ public class OrderService {
             orderItem.setOrder(order);
             orderItem.setMenuItem(menuItem);
             orderItem.setQuantity(itemDto.getQuantity());
-            BigDecimal menuItemPrice = menuItem.getPrice();
-            BigDecimal lineItemTotalPrice = menuItemPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity()));
-            orderItem.setTotalPrice(lineItemTotalPrice);
 
+            Set<ItemVariation> chosenVariations = new HashSet<>();
+            for (UUID variationId : itemDto.getChosenVariationIds()) {
+                ItemVariation variation = itemVariationRepository.findById(variationId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Variation not found: " + variationId));
+                chosenVariations.add(variation);
+            }
+            orderItem.setChosenVariations(chosenVariations);
+
+            BigDecimal basePrice = menuItem.getPrice();
+            BigDecimal variationsTotal = chosenVariations.stream()
+                    .map(ItemVariation::getPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal lineTotal = (basePrice.add(variationsTotal)).multiply(BigDecimal.valueOf(itemDto.getQuantity()));
+            orderItem.setTotalPrice(lineTotal);
+
+            totalOrderAmount = totalOrderAmount.add(lineTotal);
             processedOrderItems.add(orderItem);
-            totalOrderAmount = totalOrderAmount.add(lineItemTotalPrice);
         }
 
+        order.setOrderItems(processedOrderItems);
         order.setTotalAmount(totalOrderAmount);
 
         Order savedOrder = orderRepository.save(order);
 
-        for (OrderItem item : processedOrderItems) {
-            item.setOrder(savedOrder);
-        }
-        orderItemRepository.saveAll(processedOrderItems);
-
-        return this.orderMapper.toOrderViewDto(savedOrder);
+        return orderMapper.toOrderViewDto(savedOrder);
     }
 
     @Transactional
@@ -97,26 +103,35 @@ public class OrderService {
 
     @Transactional
     public OrderViewDto updateOrderStatus(UUID orderId, OrderStatusUpdateRequestDto requestDto) {
+        StatusType newStatus;
         try {
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
+            newStatus = StatusType.valueOf(requestDto.getNewStatus().trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidStatusValueException("Unknown status: " + requestDto.getNewStatus(), ex);
+        }
 
-            StatusType newStatusEnum;
-            try {
-                newStatusEnum = StatusType.valueOf(requestDto.getNewStatus().trim().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new InvalidStatusValueException("Invalid status value provided: '" + requestDto.getNewStatus() +
-                        "'. Valid statuses are: " + List.of(StatusType.values()), e);
-            }
+        try {
+            Order base = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new OrderNotFoundException("Order " + orderId + " not found"));
 
-            order.setStatus(newStatusEnum);
+            Order detached = Order.builder()
+                    .orderId(orderId)
+                    .version(requestDto.getVersion())
+                    .status(newStatus)
+                    .myUser(base.getMyUser())
+                    .orderDate(base.getOrderDate())
+                    .pickupTime(base.getPickupTime())
+                    .totalAmount(base.getTotalAmount())
+                    .orderItems(base.getOrderItems())
+                    .build();
 
-            Order savedOrder = orderRepository.save(order);
+            Order merged = orderRepository.save(detached);
 
-            return this.orderMapper.toOrderViewDto(savedOrder);
+            return orderMapper.toOrderViewDto(merged);
 
-        } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
-            throw new OptimisticLockingConflictException("Order update failed due to a version conflict. Please refresh and try again.", e);
+        } catch (ObjectOptimisticLockingFailureException | OptimisticLockException ex) {
+            throw new OptimisticLockingConflictException(
+                    "Order update failed – it was changed by someone else.", ex);
         }
     }
 
