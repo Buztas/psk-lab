@@ -7,7 +7,7 @@ import org.psk.lab.payment.data.repository.PaymentRepository;
 import org.psk.lab.payment.exception.OptimisticPaymentLockException;
 import org.psk.lab.payment.exception.PaymentNotFoundException;
 import org.psk.lab.payment.mapper.PaymentMapper;
-import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,11 +60,14 @@ public class DefaultPaymentService implements PaymentService {
     @Override
     @Transactional
     public String deletePayment(UUID id) {
-        if (!repository.existsById(id)) {
-            throw new PaymentNotFoundException(id);
+        try {
+            Payment payment = repository.findById(id)
+                    .orElseThrow(() -> new PaymentNotFoundException(id));
+            repository.delete(payment);
+            return "Payment with ID " + id + " was deleted successfully";
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new OptimisticPaymentLockException("Payment was modified concurrently. Cannot delete.", e);
         }
-        repository.deleteById(id);
-        return "Payment with ID " + id + " was deleted successfully";
     }
 
     @Override
@@ -82,9 +85,8 @@ public class DefaultPaymentService implements PaymentService {
 
             repository.save(payment);
             return "Payment with ID " + id + " was updated to status: " + status;
-
-        } catch (OptimisticLockingFailureException e) {
-            throw new OptimisticPaymentLockException("Payment with ID " + id + " was concurrently modified.", e);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new OptimisticPaymentLockException("Payment was updated concurrently. Please retry.", e);
         }
     }
 
