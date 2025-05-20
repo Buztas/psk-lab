@@ -8,5 +8,6 @@ public record PaymentDTO(
         String orderId,
         BigDecimal amount,
         PaymentStatus status,
-        String transactionId
+        String transactionId,
+        Integer version
 ) {}

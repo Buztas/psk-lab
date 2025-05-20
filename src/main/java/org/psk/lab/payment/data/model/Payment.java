@@ -23,6 +23,9 @@ public class Payment {
     private LocalDateTime paymentDate;
     @Column(nullable = false)
     private String transactionId;
+    @Version
+    @Column(nullable = false)
+    private Integer version;
 
     public Payment() {
     }

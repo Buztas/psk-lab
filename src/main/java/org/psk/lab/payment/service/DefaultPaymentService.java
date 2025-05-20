@@ -4,8 +4,10 @@ import org.psk.lab.payment.data.dto.PaymentDTO;
 import org.psk.lab.payment.data.model.Payment;
 import org.psk.lab.payment.data.model.PaymentStatus;
 import org.psk.lab.payment.data.repository.PaymentRepository;
+import org.psk.lab.payment.exception.OptimisticPaymentLockException;
 import org.psk.lab.payment.exception.PaymentNotFoundException;
 import org.psk.lab.payment.mapper.PaymentMapper;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,17 +70,22 @@ public class DefaultPaymentService implements PaymentService {
     @Override
     @Transactional
     public String updatePayment(UUID id, PaymentStatus status, String transactionId) {
-        Payment payment = repository.findById(id)
-                .orElseThrow(() -> new PaymentNotFoundException(id));
+        try {
+            Payment payment = repository.findById(id)
+                    .orElseThrow(() -> new PaymentNotFoundException(id));
 
-        validateStatusTransition(payment.getPaymentStatus(), status);
+            validateStatusTransition(payment.getPaymentStatus(), status);
 
-        payment.setPaymentStatus(status);
-        payment.setTransactionId(transactionId);
-        payment.setPaymentDate(LocalDateTime.now());
+            payment.setPaymentStatus(status);
+            payment.setTransactionId(transactionId);
+            payment.setPaymentDate(LocalDateTime.now());
 
-        repository.save(payment);
-        return "Payment with ID " + id + " was updated to status: " + status;
+            repository.save(payment);
+            return "Payment with ID " + id + " was updated to status: " + status;
+
+        } catch (OptimisticLockingFailureException e) {
+            throw new OptimisticPaymentLockException("Payment with ID " + id + " was concurrently modified.", e);
+        }
     }
 
     private void validateStatusTransition(PaymentStatus currentStatus, PaymentStatus newStatus) {
