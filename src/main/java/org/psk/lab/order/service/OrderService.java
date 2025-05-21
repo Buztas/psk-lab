@@ -42,9 +42,9 @@ public class OrderService {
 
 
     @Transactional
-    public OrderViewDto createOrder(OrderCreateRequestDto requestDto) {
+    public OrderViewDto createOrder(UUID authenticatedUserId,OrderCreateRequestDto requestDto) {
         Order order = new Order();
-        MyUser myUser = userRepository.findById(requestDto.getUserId())
+        MyUser myUser = userRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         order.setMyUser(myUser);
         order.setOrderDate(LocalDateTime.now());

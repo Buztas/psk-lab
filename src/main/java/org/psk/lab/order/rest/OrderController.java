@@ -10,6 +10,9 @@ import org.psk.lab.order.data.dto.OrderStatusUpdateRequestDto;
 import org.psk.lab.order.data.dto.OrderSummaryDto;
 import org.psk.lab.order.data.dto.OrderViewDto;
 import org.psk.lab.order.service.OrderService;
+import org.psk.lab.user.data.model.MyUser;
+import org.psk.lab.user.data.repository.UserRepository;
+import org.psk.lab.user.exception.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -18,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.UUID;
 
 @SecurityRequirement(name = "bearerAuth")
@@ -29,10 +33,15 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
+    private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<OrderViewDto> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto) {
-        OrderViewDto createdOrderDto = orderService.createOrder(requestDto);
+    public ResponseEntity<OrderViewDto> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto, Principal principal) {
+        String username = principal.getName();
+        MyUser authenticatedUser = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+        UUID authenticatedUserId = authenticatedUser.getUuid();
+        OrderViewDto createdOrderDto = orderService.createOrder(authenticatedUserId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
     }
 
