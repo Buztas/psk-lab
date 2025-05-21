@@ -3,6 +3,7 @@ package org.psk.lab.user.service;
 import jakarta.transaction.Transactional;
 import org.psk.lab.mapper.UserMapper;
 import org.psk.lab.user.data.dto.UserDTO;
+import org.psk.lab.user.data.dto.UserUpdateDTO;
 import org.psk.lab.user.data.repository.UserRepository;
 import org.psk.lab.user.data.response.UserResponse;
 import org.psk.lab.user.exception.UserNotFoundException;
@@ -16,12 +17,10 @@ import java.util.UUID;
 public class DefaultUserService implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
 
-    public DefaultUserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public DefaultUserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -41,15 +40,11 @@ public class DefaultUserService implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateUser(UUID id, UserDTO userDTO) {
+    public UserResponse updateUser(UUID id, UserUpdateDTO userDTO) {
         var existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
 
         existingUser.setEmail(userDTO.email());
-
-        if (userDTO.password() != null && !userDTO.password().isBlank()) {
-            existingUser.setPassword(passwordEncoder.encode(userDTO.password()));
-        }
 
         if (userDTO.roleType() != null) {
             existingUser.setRole(userDTO.roleType());

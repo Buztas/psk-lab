@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.psk.lab.user.data.dto.UserDTO;
+import org.psk.lab.user.data.dto.UserUpdateDTO;
 import org.psk.lab.user.data.response.UserResponse;
 import org.psk.lab.user.service.UserService;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +37,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserResponse updateUser(@PathVariable UUID id, @Valid @RequestBody UserDTO userDTO) {
+    public UserResponse updateUser(@PathVariable UUID id, @Valid @RequestBody UserUpdateDTO userDTO) {
         return userService.updateUser(id, userDTO);
     }
 
