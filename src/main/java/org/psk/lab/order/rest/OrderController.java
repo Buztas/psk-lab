@@ -59,7 +59,7 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<Page<OrderSummaryDto>> getAllOrders(
-            @PageableDefault(size = 20, sort = "orderDate,asc") Pageable pageable
+            @PageableDefault(size = 20, sort = "orderDate,desc") Pageable pageable
     ) {
         Page<OrderSummaryDto> orderPage = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orderPage);
@@ -68,7 +68,7 @@ public class OrderController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<Page<OrderSummaryDto>> getOrdersByUserId(
             @PathVariable UUID userId,
-            @PageableDefault(size = 10, sort = "orderDate,asc") Pageable pageable
+            @PageableDefault(size = 10, sort = "orderDate,desc") Pageable pageable
     ) {
         Page<OrderSummaryDto> userOrdersPage = orderService.getOrdersByUserId(userId, pageable);
         return ResponseEntity.ok(userOrdersPage);
@@ -77,7 +77,7 @@ public class OrderController {
     @GetMapping("/my-orders")
     public ResponseEntity<Page<OrderSummaryDto>> getMyOrders(
             Principal principal,
-            @PageableDefault(size = 10, sort = "orderDate,asc") Pageable pageable
+            @PageableDefault(size = 10, sort = "orderDate,desc") Pageable pageable
     ) {
         String username = principal.getName();
         MyUser authenticatedUser = userRepository.findByEmail(username)

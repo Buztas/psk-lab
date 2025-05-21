@@ -52,7 +52,6 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/menu/**").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/menu/**").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/menu/**").hasAnyRole("EMPLOYEE", "ADMIN")
-
                         .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyRole("CUSTOMER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/orders/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/orders/{orderId}").hasAnyRole("CUSTOMER", "ADMIN", "EMPLOYEE")
@@ -61,7 +60,6 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/orders/my-orders").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.PUT, "/api/orders/{orderId}/status").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/{orderId}").hasAnyRole("ADMIN", "EMPLOYEE")
-
                         .requestMatchers(HttpMethod.POST, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("EMPLOYEE", "ADMIN")
