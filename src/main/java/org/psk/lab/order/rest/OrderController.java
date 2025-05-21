@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.psk.lab.order.data.dto.OrderCreateRequestDto;
-import org.psk.lab.order.data.dto.OrderStatusUpdateRequestDto;
-import org.psk.lab.order.data.dto.OrderSummaryDto;
-import org.psk.lab.order.data.dto.OrderViewDto;
+import org.psk.lab.order.data.dto.*;
 import org.psk.lab.order.service.OrderService;
 import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.repository.UserRepository;
@@ -42,6 +39,14 @@ public class OrderController {
                 .orElseThrow(() -> new UserNotFoundException(username));
         UUID authenticatedUserId = authenticatedUser.getUuid();
         OrderViewDto createdOrderDto = orderService.createOrder(authenticatedUserId, requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
+    }
+
+    @PostMapping("/admin/orders")
+    public ResponseEntity<OrderViewDto> createOrderAdmin(@Valid @RequestBody AdminOrderCreateRequestDto adminRequestDto) {
+        OrderCreateRequestDto itemsDto = new OrderCreateRequestDto();
+        itemsDto.setItems(adminRequestDto.getItems());
+        OrderViewDto createdOrderDto = orderService.createOrder(adminRequestDto.getUserId(), itemsDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
     }
 

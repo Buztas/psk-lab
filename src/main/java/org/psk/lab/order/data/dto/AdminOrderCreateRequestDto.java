@@ -8,17 +8,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class OrderCreateRequestDto {
+public class AdminOrderCreateRequestDto {
+
+    @NotNull(message = "User ID cannot be null.")
+    private UUID userId;
 
     @NotEmpty(message = "Order must contain at least one item.")
     @Valid
     private List<OrderItemRequestDto> items = new ArrayList<>();
 
-    public OrderCreateRequestDto() {}
+    public AdminOrderCreateRequestDto() {}
 
-    public OrderCreateRequestDto(List<OrderItemRequestDto> items) {
+    public AdminOrderCreateRequestDto(UUID userId, List<OrderItemRequestDto> items) {
+        this.userId = userId;
         this.items = items;
     }
+
+    public UUID getUserId() {return userId;}
+
+    public void setUserId(UUID userId) {this.userId = userId;}
 
     public List<OrderItemRequestDto> getItems() {
         return items;
