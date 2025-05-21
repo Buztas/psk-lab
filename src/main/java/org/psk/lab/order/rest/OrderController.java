@@ -42,7 +42,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
     }
 
-    @PostMapping("/admin/orders")
+    @PostMapping("/admin")
     public ResponseEntity<OrderViewDto> createOrderAdmin(@Valid @RequestBody AdminOrderCreateRequestDto adminRequestDto) {
         OrderCreateRequestDto itemsDto = new OrderCreateRequestDto();
         itemsDto.setItems(adminRequestDto.getItems());
@@ -59,10 +59,33 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<Page<OrderSummaryDto>> getAllOrders(
-            @PageableDefault(size = 20, sort = "orderDate") Pageable pageable
+            @PageableDefault(size = 20, sort = "orderDate,asc") Pageable pageable
     ) {
         Page<OrderSummaryDto> orderPage = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orderPage);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<OrderSummaryDto>> getOrdersByUserId(
+            @PathVariable UUID userId,
+            @PageableDefault(size = 10, sort = "orderDate,asc") Pageable pageable
+    ) {
+        Page<OrderSummaryDto> userOrdersPage = orderService.getOrdersByUserId(userId, pageable);
+        return ResponseEntity.ok(userOrdersPage);
+    }
+
+    @GetMapping("/my-orders")
+    public ResponseEntity<Page<OrderSummaryDto>> getMyOrders(
+            Principal principal,
+            @PageableDefault(size = 10, sort = "orderDate,asc") Pageable pageable
+    ) {
+        String username = principal.getName();
+        MyUser authenticatedUser = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+        UUID authenticatedUserId = authenticatedUser.getUuid();
+
+        Page<OrderSummaryDto> myOrdersPage = orderService.getOrdersByUserId(authenticatedUserId, pageable);
+        return ResponseEntity.ok(myOrdersPage);
     }
 
     @PutMapping("/{orderId}/status")
