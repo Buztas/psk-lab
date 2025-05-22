@@ -33,22 +33,11 @@ public class OrderController {
     private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<OrderViewDto> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto, Principal principal) {
-        String username = principal.getName();
-        MyUser authenticatedUser = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
-        UUID authenticatedUserId = authenticatedUser.getUuid();
-        OrderViewDto createdOrderDto = orderService.createOrder(authenticatedUserId, requestDto);
+    public ResponseEntity<OrderViewDto> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto) {
+        OrderViewDto createdOrderDto = orderService.createOrder(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
     }
 
-    @PostMapping("/admin")
-    public ResponseEntity<OrderViewDto> createOrderAdmin(@Valid @RequestBody AdminOrderCreateRequestDto adminRequestDto) {
-        OrderCreateRequestDto itemsDto = new OrderCreateRequestDto();
-        itemsDto.setItems(adminRequestDto.getItems());
-        OrderViewDto createdOrderDto = orderService.createOrder(adminRequestDto.getUserId(), itemsDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
-    }
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderViewDto> getOrderById(@PathVariable UUID orderId) {
