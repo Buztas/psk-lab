@@ -11,5 +11,6 @@ public interface UserMapper {
     @Mapping(source="roleType", target="role")
     MyUser toEntity(UserDTO userDTO);
 
+    @Mapping(source = "uuid", target = "id")
     UserResponse toUserResponse(MyUser myUser);
 }
