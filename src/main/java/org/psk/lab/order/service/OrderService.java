@@ -102,6 +102,12 @@ public class OrderService {
     }
 
     @Transactional
+    public Page<OrderSummaryDto> getOrdersByUserId(UUID userId, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findByMyUser_Uuid(userId, pageable);
+        return orderPage.map(orderMapper::toOrderSummaryDto);
+    }
+
+    @Transactional
     public OrderViewDto updateOrderStatus(UUID orderId, OrderStatusUpdateRequestDto requestDto) {
         StatusType newStatus;
         try {
