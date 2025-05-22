@@ -1,0 +1,139 @@
+package org.psk.lab.notification.domain.services;
+
+import jakarta.transaction.Transactional;
+import org.psk.lab.notification.domain.dtos.NotificationDto;
+import org.psk.lab.notification.data.entities.Notification;
+import org.psk.lab.notification.domain.strategies.NotificationStrategy;
+import org.psk.lab.notification.helper.enums.NotificationStatus;
+import org.psk.lab.notification.helper.enums.NotificationType;
+import org.psk.lab.notification.data.repositories.NotificationRepository;
+import org.psk.lab.notification.helper.mapper.NotificationMapper;
+import org.psk.lab.notification.helper.util.NotificationMessageBuilder;
+import org.psk.lab.order.data.dto.OrderViewDto;
+import org.psk.lab.order.service.OrderService;
+import org.springframework.stereotype.Service;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class NotificationService {
+    private final NotificationMapper notificationMapper;
+    private final OrderService orderService;
+    private final NotificationRepository notificationRepository;
+    private final Map<NotificationType, NotificationStrategy> strategies;
+
+    public NotificationService(
+            NotificationRepository notificationRepository,
+            List<NotificationStrategy> strategies,
+            OrderService orderService,
+            NotificationMapper notificationMapper
+    ) {
+        this.notificationMapper = notificationMapper;
+        this.notificationRepository = notificationRepository;
+        this.orderService = orderService;
+        this.strategies = strategies.stream()
+                .collect(Collectors.toUnmodifiableMap(NotificationStrategy::getType, strategy -> strategy));
+    }
+
+    public void testSend(){
+        NotificationDto notificationDto = new NotificationDto(
+                UUID.randomUUID(),
+                "Test order id",
+                new Timestamp(System.currentTimeMillis()),
+                UUID.randomUUID(),
+                NotificationStatus.PENDING,
+                NotificationType.EMAIL
+        );
+        NotificationStrategy strategy = strategies.get(NotificationType.EMAIL);
+        strategy.send(notificationDto);
+    }
+
+    public NotificationDto send(NotificationDto notificationDto) {
+        // find strategy
+        NotificationStrategy strategy = strategies.get(notificationDto.type());
+
+        // send notification
+        strategy.send(notificationDto);
+
+        // update notification status
+        if(strategy.send(notificationDto)) {
+            // sent successfully
+            updateNotificationStatus(notificationDto.id(), NotificationStatus.SENT);
+        } else {
+            // sent failed
+            updateNotificationStatus(notificationDto.id(), NotificationStatus.FAILED);
+        }
+
+        return notificationDto;
+    }
+
+    /*
+        * Create a new notification for the given order and type.
+        * Builds the notification message using the order details.
+     */
+    public NotificationDto createNotification(UUID orderId, NotificationType type) {
+        Notification notification = new Notification();
+        Optional<OrderViewDto> order = orderService.getOrderById(orderId);
+        if (order.isEmpty()) {
+            throw new RuntimeException("Order not found");
+        }
+
+        // build notification message
+        String msg = NotificationMessageBuilder.buildNotificationMessage(order.get());
+
+        // build notification
+        notification.setMessage(msg);
+        notification.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        notification.setOrderId(orderId);
+        notification.setStatus(NotificationStatus.PENDING);
+        notification.setType(type);
+        notification.setOrderId(orderId);
+
+        // save notification to db
+        notification = notificationRepository.save(notification);
+
+        return notificationMapper.toDto(notification);
+    }
+
+    @Transactional
+    public void updateNotificationStatus(UUID notificationId, NotificationStatus status) {
+        Optional<Notification> notification = notificationRepository.findById(notificationId);
+        if (notification.isEmpty()) {
+            throw new RuntimeException("Notification not found");
+        }
+
+        // update notification status
+        notification.get().setStatus(status);
+
+        // save notification to db
+        notification = Optional.of(notificationRepository.save(notification.get()));
+
+        notificationMapper.toDto(notification.get());
+    }
+
+    public List<NotificationDto> getAllNotifications() {
+        return notificationRepository.findAll()
+                .stream()
+                .map(notificationMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public Optional<NotificationDto> getNotificationById(UUID notificationId) {
+        return notificationRepository.findById(notificationId)
+                .map(notificationMapper::toDto);
+    }
+
+    public Optional<NotificationDto> getNotificationByOrderId(UUID orderId) {
+        return notificationRepository.findByOrderId((orderId))
+                .map(notificationMapper::toDto);
+    }
+
+    // todo add exception handling
+}

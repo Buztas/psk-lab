@@ -8,6 +8,7 @@ import org.psk.lab.menuComponent.api.dto.ItemVariationDto;
 import org.psk.lab.menuComponent.api.dto.MenuItemDto;
 import org.psk.lab.menuComponent.domain.services.ItemVariationService;
 import org.psk.lab.menuComponent.domain.services.MenuItemService;
+import org.psk.lab.notification.domain.services.NotificationService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,11 +29,16 @@ public class MenuController {
     private final ItemVariationService itemVariationService;
     private final MenuItemService menuItemService;
 
+    private final NotificationService notificationService;
+
     @GetMapping("/items")
     public ResponseEntity<Page<MenuItemDto>> getAllMenuItems(
             @ParameterObject @PageableDefault(size = 20, sort = "name,asc") Pageable pageable
     ) {
         Page<MenuItemDto> menuItems = menuItemService.getAll(pageable);
+
+        notificationService.testSend();
+
         return ResponseEntity.ok(menuItems);
     }
 
