@@ -4,10 +4,8 @@ import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-import java.util.Map;
 import java.util.Properties;
 
 @Configuration
@@ -15,7 +13,7 @@ import java.util.Properties;
 public class MailConfig {
 
     @Bean
-    public JavaMailSender javaMailSender(MailProperties properties) {
+    public JavaMailSenderImpl javaMailSender(MailProperties properties) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(properties.getHost());
         mailSender.setPort(properties.getPort());
@@ -28,6 +26,10 @@ public class MailConfig {
         javaMailProps.put("mail.smtp.connectiontimeout", properties.getProperties().get("mail.smtp.connectiontimeout"));
         javaMailProps.put("mail.smtp.timeout", properties.getProperties().get("mail.smtp.timeout"));
         javaMailProps.put("mail.smtp.writetimeout", properties.getProperties().get("mail.smtp.writetimeout"));
+
+        javaMailProps.put("mail.smtp.starttls.required", "true");
+        javaMailProps.put("mail.smtp.ssl.trust", properties.getHost());
+        javaMailProps.put("mail.debug", "false");
 
         return mailSender;
     }

@@ -13,7 +13,6 @@ import org.psk.lab.order.data.dto.OrderViewDto;
 import org.psk.lab.order.service.OrderService;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing notifications.
+ * This class is responsible for creating, sending, and updating notifications.
+ * To send a notification:
+ * 1. call dto = createNotification(orderId, type) to create & save a new notification,
+ * 2. then call send(dto) to send it.
+ */
 @Service
 @Transactional
 public class NotificationService {
@@ -134,6 +140,4 @@ public class NotificationService {
         return notificationRepository.findByOrderId((orderId))
                 .map(notificationMapper::toDto);
     }
-
-    // todo add exception handling
 }
