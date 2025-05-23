@@ -1,45 +1,32 @@
 package org.psk.lab.payment.data.model;
 
 import jakarta.persistence.*;
-
+import org.psk.lab.order.data.model.Order;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 public class Payment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue
     private UUID id;
-    @Column(nullable = false)
-    private UUID orderId;
-    @Column(nullable = false, precision = 10, scale = 2)
+
+    @OneToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus;
-    @Column(nullable = false)
-    private LocalDateTime paymentDate;
-    @Column(nullable = false)
     private String transactionId;
+    private LocalDateTime paymentDate;
+
     @Version
-    @Column(nullable = false)
     private Integer version;
 
-    public Payment() {
-    }
-
-    public Payment(UUID id, UUID orderId, BigDecimal amount, PaymentStatus paymentStatus,
-                   LocalDateTime paymentDate, String transactionId) {
-        this.id = id;
-        this.orderId = orderId;
-        this.amount = amount;
-        this.paymentStatus = paymentStatus;
-        this.paymentDate = paymentDate;
-        this.transactionId = transactionId;
-    }
-
+    // Getters and Setters
     public UUID getId() {
         return id;
     }
@@ -48,12 +35,12 @@ public class Payment {
         this.id = id;
     }
 
-    public UUID getOrderId() {
-        return orderId;
+    public Order getOrder() {
+        return order;
     }
 
-    public void setOrderId(UUID orderId) {
-        this.orderId = orderId;
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     public BigDecimal getAmount() {
@@ -72,14 +59,6 @@ public class Payment {
         this.paymentStatus = paymentStatus;
     }
 
-    public LocalDateTime getPaymentDate() {
-        return paymentDate;
-    }
-
-    public void setPaymentDate(LocalDateTime paymentDate) {
-        this.paymentDate = paymentDate;
-    }
-
     public String getTransactionId() {
         return transactionId;
     }
@@ -88,32 +67,29 @@ public class Payment {
         this.transactionId = transactionId;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Payment payment = (Payment) o;
-        return Objects.equals(id, payment.id) &&
-                Objects.equals(orderId, payment.orderId) &&
-                Objects.equals(amount, payment.amount) &&
-                paymentStatus == payment.paymentStatus &&
-                Objects.equals(paymentDate, payment.paymentDate) &&
-                Objects.equals(transactionId, payment.transactionId);
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, orderId, amount, paymentStatus, paymentDate, transactionId);
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
-    @Override
-    public String toString() {
-        return "Payment{" +
-                "id=" + id +
-                ", orderId=" + orderId +
-                ", amount=" + amount +
-                ", paymentStatus=" + paymentStatus +
-                ", paymentDate=" + paymentDate +
-                ", transactionId='" + transactionId + '\'' +
-                '}';
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public static Payment create(Order order, BigDecimal amount, PaymentStatus status, String transactionId) {
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setAmount(amount);
+        payment.setPaymentDate(LocalDateTime.now());
+        payment.setPaymentStatus(status);
+        payment.setTransactionId(transactionId);
+        return payment;
     }
 }
