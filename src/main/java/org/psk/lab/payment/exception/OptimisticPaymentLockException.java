@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.CONFLICT)
 public class OptimisticPaymentLockException extends RuntimeException {
+    public OptimisticPaymentLockException(String message) {
+        super(message);
+    }
 
     public OptimisticPaymentLockException(String message, Throwable cause) {
         super(message, cause);

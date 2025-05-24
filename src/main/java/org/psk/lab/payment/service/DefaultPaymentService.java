@@ -1,92 +1,103 @@
 package org.psk.lab.payment.service;
 
-import org.psk.lab.payment.data.dto.PaymentDTO;
+import jakarta.persistence.OptimisticLockException;
+import org.psk.lab.order.data.model.Order;
+import org.psk.lab.order.data.repository.OrderRepository;
+import org.psk.lab.payment.data.dto.PaymentCreateDto;
+import org.psk.lab.payment.data.dto.PaymentStatusUpdateDto;
+import org.psk.lab.payment.data.dto.PaymentViewDto;
 import org.psk.lab.payment.data.model.Payment;
 import org.psk.lab.payment.data.model.PaymentStatus;
 import org.psk.lab.payment.data.repository.PaymentRepository;
 import org.psk.lab.payment.exception.OptimisticPaymentLockException;
 import org.psk.lab.payment.exception.PaymentNotFoundException;
 import org.psk.lab.payment.mapper.PaymentMapper;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class DefaultPaymentService implements PaymentService {
-
-    private final PaymentRepository repository;
+    private final PaymentRepository paymentRepository;
     private final PaymentMapper mapper;
+    private final OrderRepository orderRepository;
 
-    public DefaultPaymentService(PaymentRepository repository, PaymentMapper mapper) {
-        this.repository = repository;
+    public DefaultPaymentService(PaymentRepository paymentRepository,
+                                 OrderRepository orderRepository,
+                                 PaymentMapper mapper) {
+        this.paymentRepository = paymentRepository;
+        this.orderRepository = orderRepository;
         this.mapper = mapper;
     }
 
-
     @Override
     @Transactional
-    public UUID createPayment(PaymentDTO dto) {
-        Payment payment = mapper.toEntity(dto);
+    public PaymentViewDto createPayment(PaymentCreateDto dto) {
+        Order order = orderRepository.findById(dto.getOrderId())
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
-        // Set default values if not provided
-        if (payment.getPaymentStatus() == null) {
-            payment.setPaymentStatus(PaymentStatus.PENDING);
-        }
-        if (payment.getPaymentDate() == null) {
-            payment.setPaymentDate(LocalDateTime.now());
-        }
-        if (payment.getTransactionId() == null) {
-            payment.setTransactionId("txn_" + UUID.randomUUID().toString().substring(0, 12));
-        }
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setAmount(order.getTotalAmount());
+        payment.setPaymentStatus(PaymentStatus.PENDING);
+        payment.setPaymentDate(LocalDateTime.now());
+        payment.setTransactionId("txn_" + UUID.randomUUID().toString().substring(0, 12));
 
-        return repository.save(payment).getId();
+        // Save and map to PaymentViewDto
+        Payment savedPayment = paymentRepository.save(payment);
+        return mapper.toViewDto(savedPayment);
     }
 
     @Override
-    public Payment getPayment(UUID id) {
-        return repository.findById(id)
+    public Optional<PaymentViewDto> getPaymentById(UUID id) {
+        return paymentRepository.findById(id)
+                .map(mapper::toViewDto);
+    }
+
+    @Override
+    public Page<PaymentViewDto> getAllPayments(Pageable pageable) {
+        return paymentRepository.findAll(pageable)
+                .map(mapper::toViewDto);
+    }
+
+    @Override
+    @Transactional
+    public PaymentViewDto updatePayment(UUID id, PaymentStatusUpdateDto dto) {
+        Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException(id));
-    }
 
-    @Override
-    public List<Payment> getAllPayments() {
-        return repository.findAll();
-    }
+        validateStatusTransition(payment.getPaymentStatus(), dto.getStatus());
 
-    @Override
-    @Transactional
-    public String deletePayment(UUID id) {
+        payment.setPaymentStatus(dto.getStatus());
+        payment.setTransactionId(dto.getTransactionId());
+        payment.setPaymentDate(LocalDateTime.now());
+
         try {
-            Payment payment = repository.findById(id)
-                    .orElseThrow(() -> new PaymentNotFoundException(id));
-            repository.delete(payment);
-            return "Payment with ID " + id + " was deleted successfully";
-        } catch (ObjectOptimisticLockingFailureException e) {
-            throw new OptimisticPaymentLockException("Payment was modified concurrently. Cannot delete.", e);
+            return mapper.toViewDto(paymentRepository.save(payment));
+        } catch (OptimisticLockException e) {
+            throw new OptimisticPaymentLockException("Payment with ID " + id + " is locked", e);
         }
     }
 
     @Override
     @Transactional
-    public String updatePayment(UUID id, PaymentStatus status, String transactionId) {
+    public void deletePayment(UUID id, int version) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException(id));
+
+        if (payment.getVersion() != version) {
+            throw new OptimisticPaymentLockException("Payment with ID " + id + " has been modified");
+        }
+
         try {
-            Payment payment = repository.findById(id)
-                    .orElseThrow(() -> new PaymentNotFoundException(id));
-
-            validateStatusTransition(payment.getPaymentStatus(), status);
-
-            payment.setPaymentStatus(status);
-            payment.setTransactionId(transactionId);
-            payment.setPaymentDate(LocalDateTime.now());
-
-            repository.save(payment);
-            return "Payment with ID " + id + " was updated to status: " + status;
-        } catch (ObjectOptimisticLockingFailureException e) {
-            throw new OptimisticPaymentLockException("Payment was updated concurrently. Please retry.", e);
+            paymentRepository.delete(payment);
+        } catch (OptimisticLockException e) {
+            throw new OptimisticPaymentLockException("Payment with ID " + id + " is locked", e);
         }
     }
 

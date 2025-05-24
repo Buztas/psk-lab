@@ -1,30 +1,33 @@
-package org.psk.lab.payment.data.model;
+package org.psk.lab.payment.data.dto;
 
-import jakarta.persistence.*;
-import org.psk.lab.order.data.model.Order;
+import org.psk.lab.payment.data.model.PaymentStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-public class Payment {
-    @Id
-    @GeneratedValue
+public class PaymentViewDto {
     private UUID id;
-
-    @OneToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
-
+    private UUID orderId;
     private BigDecimal amount;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus;
     private String transactionId;
     private LocalDateTime paymentDate;
-
-    @Version
     private Integer version;
+
+    public PaymentViewDto() {
+    }
+
+    public PaymentViewDto(UUID id, UUID orderId, BigDecimal amount,
+                          PaymentStatus paymentStatus, String transactionId,
+                          LocalDateTime paymentDate, Integer version) {
+        this.id = id;
+        this.orderId = orderId;
+        this.amount = amount;
+        this.paymentStatus = paymentStatus;
+        this.transactionId = transactionId;
+        this.paymentDate = paymentDate;
+        this.version = version;
+    }
 
     // Getters and Setters
     public UUID getId() {
@@ -35,12 +38,12 @@ public class Payment {
         this.id = id;
     }
 
-    public Order getOrder() {
-        return order;
+    public UUID getOrderId() {
+        return orderId;
     }
 
-    public void setOrder(Order order) {
-        this.order = order;
+    public void setOrderId(UUID orderId) {
+        this.orderId = orderId;
     }
 
     public BigDecimal getAmount() {
@@ -81,15 +84,5 @@ public class Payment {
 
     public void setVersion(Integer version) {
         this.version = version;
-    }
-
-    public static Payment create(Order order, BigDecimal amount, PaymentStatus status, String transactionId) {
-        Payment payment = new Payment();
-        payment.setOrder(order);
-        payment.setAmount(amount);
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setPaymentStatus(status);
-        payment.setTransactionId(transactionId);
-        return payment;
     }
 }
