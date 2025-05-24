@@ -17,5 +17,6 @@ public record MenuItemDto (
     @NotNull @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal price,
     @NotBlank ItemType type,
     @NotNull @Min(0) int stock,
+    @NotNull int version,
     @Valid Set<ItemVariationDto> variations
 ){}
