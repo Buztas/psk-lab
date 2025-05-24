@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.psk.lab.notification.domain.services.NotificationService;
+import org.psk.lab.notification.helper.enums.NotificationType;
 import org.psk.lab.order.data.dto.*;
 import org.psk.lab.order.service.OrderService;
 import org.psk.lab.user.data.model.MyUser;
@@ -31,10 +33,13 @@ public class OrderController {
 
     private final OrderService orderService;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @PostMapping
     public ResponseEntity<OrderViewDto> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto) {
         OrderViewDto createdOrderDto = orderService.createOrder(requestDto);
+        var notification = notificationService.createNotification(createdOrderDto.getOrderId(), NotificationType.EMAIL, "Your order has been FULFILLED!\n");
+        notificationService.send(notification);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderDto);
     }
 
@@ -82,12 +87,16 @@ public class OrderController {
             @PathVariable UUID orderId,
             @Valid @RequestBody OrderStatusUpdateRequestDto requestDto) {
         OrderViewDto updatedOrderDto = orderService.updateOrderStatus(orderId, requestDto);
+        var notification = notificationService.createNotification(updatedOrderDto.getOrderId(), NotificationType.EMAIL, "Your order has been UPDATED!\n");
+        notificationService.send(notification);
         return ResponseEntity.ok(updatedOrderDto);
     }
 
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(@PathVariable UUID orderId) {
         orderService.deleteOrder(orderId);
+        var notification = notificationService.createNotification(orderId, NotificationType.EMAIL, "Your order has been DELETED!\n");
+        notificationService.send(notification);
         return ResponseEntity.noContent().build();
     }
 }
