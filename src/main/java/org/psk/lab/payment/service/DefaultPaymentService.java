@@ -1,5 +1,7 @@
 package org.psk.lab.payment.service;
 
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
 import jakarta.persistence.OptimisticLockException;
 import org.psk.lab.order.data.model.Order;
 import org.psk.lab.order.data.repository.OrderRepository;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,13 +29,16 @@ public class DefaultPaymentService implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper mapper;
     private final OrderRepository orderRepository;
+    private final StripeService stripeService;
 
     public DefaultPaymentService(PaymentRepository paymentRepository,
                                  OrderRepository orderRepository,
-                                 PaymentMapper mapper) {
+                                 PaymentMapper mapper,
+                                 StripeService stripeService) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.mapper = mapper;
+        this.stripeService = stripeService;
     }
 
     @Override
@@ -41,16 +47,21 @@ public class DefaultPaymentService implements PaymentService {
         Order order = orderRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
+        BigDecimal amount = order.getTotalAmount(); // in EUR
+        String description = "Payment for order " + order.getOrderId();
+
+        // 1. Create Stripe PaymentIntent
+        PaymentIntent intent = stripeService.createPaymentIntent(amount, "eur", description);
+
+        // 2. Create internal Payment record
         Payment payment = new Payment();
         payment.setOrder(order);
-        payment.setAmount(order.getTotalAmount());
+        payment.setAmount(amount);
+        payment.setTransactionId(intent.getId()); // Stripe intent ID
         payment.setPaymentStatus(PaymentStatus.PENDING);
         payment.setPaymentDate(LocalDateTime.now());
-        payment.setTransactionId("txn_" + UUID.randomUUID().toString().substring(0, 12));
 
-        // Save and map to PaymentViewDto
-        Payment savedPayment = paymentRepository.save(payment);
-        return mapper.toViewDto(savedPayment);
+        return mapper.toViewDto(paymentRepository.save(payment));
     }
 
     @Override
@@ -113,5 +124,17 @@ public class DefaultPaymentService implements PaymentService {
         if (newStatus == PaymentStatus.COMPLETED && currentStatus != PaymentStatus.PROCESSING) {
             throw new IllegalStateException("Can only complete payments from PROCESSING status");
         }
+    }
+
+    @Override
+    @Transactional
+    public void updateStatusByTransactionId(String transactionId, PaymentStatus newStatus) {
+        Payment payment = paymentRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment with transactionId: " + transactionId + " was not found"));
+
+        validateStatusTransition(payment.getPaymentStatus(), newStatus);
+        payment.setPaymentStatus(newStatus);
+        payment.setPaymentDate(LocalDateTime.now());
+        paymentRepository.save(payment);
     }
 }

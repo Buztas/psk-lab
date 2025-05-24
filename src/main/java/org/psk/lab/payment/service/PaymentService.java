@@ -5,9 +5,11 @@ import org.psk.lab.payment.data.dto.PaymentStatusUpdateDto;
 import org.psk.lab.payment.data.dto.PaymentViewDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.psk.lab.payment.data.model.PaymentStatus;
 
 import java.util.Optional;
 import java.util.UUID;
+
 
 public interface PaymentService {
     PaymentViewDto createPayment(PaymentCreateDto dto);
@@ -15,4 +17,5 @@ public interface PaymentService {
     Page<PaymentViewDto> getAllPayments(Pageable pageable);
     PaymentViewDto updatePayment(UUID id, PaymentStatusUpdateDto dto);
     void deletePayment(UUID id, int version);
+    void updateStatusByTransactionId(String transactionId, PaymentStatus newStatus);
 }
