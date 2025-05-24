@@ -86,15 +86,14 @@ public class NotificationService {
         * Builds the notification message using the order details.
      */
     @Transactional
-    public NotificationDto createNotification(UUID orderId, NotificationType type) throws FaultyNotificationException {
+    public NotificationDto createNotification(UUID orderId, NotificationType type, String message) throws FaultyNotificationException {
         Notification notification = new Notification();
         Optional<OrderViewDto> order = orderService.getOrderById(orderId);
         if (order.isEmpty()) {
             throw new FaultyNotificationException("InvalidOrder, id: " + orderId);
         }
-
         // build notification message
-        String msg = NotificationMessageBuilder.buildNotificationMessage(order.get());
+        String msg = NotificationMessageBuilder.buildNotificationMessage(message, order.get());
 
         // build notification
         notification.setMessage(msg);
