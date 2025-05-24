@@ -12,5 +12,6 @@ public record ItemVariationDto (
     @NotBlank @Size(max = 100) String name,
     @NotBlank @Size(max = 500) String description,
     @NotNull @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal price,
-    @NotNull @Min(0) int stock
+    @NotNull @Min(0) int stock,
+    @NotNull int version
 ) {}

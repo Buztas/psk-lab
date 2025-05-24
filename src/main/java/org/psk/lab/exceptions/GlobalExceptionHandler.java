@@ -4,6 +4,8 @@ import org.psk.lab.exceptions.variable.ApiError;
 import org.psk.lab.order.exception.InvalidStatusValueException;
 import org.psk.lab.order.exception.OptimisticLockingConflictException;
 import org.psk.lab.order.exception.OrderNotFoundException;
+import org.psk.lab.payment.exception.OptimisticPaymentLockException;
+import org.psk.lab.payment.exception.PaymentNotFoundException;
 import org.psk.lab.user.exception.InvalidUserCredentials;
 import org.psk.lab.user.exception.UserAlreadyExistsException;
 import org.psk.lab.user.exception.UserNotFoundException;
@@ -76,5 +78,20 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now().toString()
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PaymentNotFoundException.class)
+    public ResponseEntity<String> handlePaymentNotFound(PaymentNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OptimisticPaymentLockException.class)
+    public ResponseEntity<String> handleOptimisticLock(OptimisticPaymentLockException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }

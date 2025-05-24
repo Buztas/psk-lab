@@ -1,16 +1,18 @@
 package org.psk.lab.payment.service;
 
-import org.psk.lab.payment.data.dto.PaymentDTO;
-import org.psk.lab.payment.data.model.Payment;
-import org.psk.lab.payment.data.model.PaymentStatus;
+import org.psk.lab.payment.data.dto.PaymentCreateDto;
+import org.psk.lab.payment.data.dto.PaymentStatusUpdateDto;
+import org.psk.lab.payment.data.dto.PaymentViewDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PaymentService {
-    UUID createPayment(PaymentDTO dto);
-    Payment getPayment(UUID id);
-    List<Payment> getAllPayments();
-    String deletePayment(UUID id);
-    String updatePayment(UUID id, PaymentStatus status, String transactionId);
+    PaymentViewDto createPayment(PaymentCreateDto dto);
+    Optional<PaymentViewDto> getPaymentById(UUID id);
+    Page<PaymentViewDto> getAllPayments(Pageable pageable);
+    PaymentViewDto updatePayment(UUID id, PaymentStatusUpdateDto dto);
+    void deletePayment(UUID id, int version);
 }

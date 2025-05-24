@@ -20,6 +20,7 @@ public class MenuMapper {
                 .price(entity.getPrice())
                 .type(entity.getType())
                 .stock(entity.getStock())
+                .version(entity.getVersion())
                 .variations(entity.getVariations().stream()
                         .map(this::variationToDto)
                         .collect(Collectors.toSet()))
@@ -35,6 +36,7 @@ public class MenuMapper {
                 .price(dto.price())
                 .type(dto.type())
                 .stock(dto.stock())
+                .version(dto.version())
                 .variations(dto.variations().stream()
                         .map(this::variationToEntity)
                         .collect(Collectors.toSet()))
@@ -49,6 +51,7 @@ public class MenuMapper {
                 .description(entity.getDescription())
                 .price(entity.getPrice())
                 .stock(entity.getStock())
+                .version(entity.getVersion())
                 .build();
     }
 
@@ -60,6 +63,7 @@ public class MenuMapper {
                 .description(dto.description())
                 .price(dto.price())
                 .stock(dto.stock())
+                .version(dto.version())
                 .build();
     }
 }
