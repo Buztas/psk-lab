@@ -12,6 +12,9 @@ import org.psk.lab.payment.data.dto.PaymentViewDto;
 import org.psk.lab.payment.data.dto.StripePaymentRequestDto;
 import org.psk.lab.payment.service.PaymentService;
 import org.psk.lab.payment.service.StripeService;
+import org.psk.lab.user.data.model.MyUser;
+import org.psk.lab.user.data.repository.UserRepository;
+import org.psk.lab.user.exception.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -30,10 +34,12 @@ import java.util.UUID;
 public class PaymentController {
     private final PaymentService paymentService;
     private final StripeService stripeService;
+    private final UserRepository userRepository;
 
-    public PaymentController(PaymentService paymentService, StripeService stripeService) {
+    public PaymentController(PaymentService paymentService, StripeService stripeService, UserRepository userRepository) {
         this.paymentService = paymentService;
         this.stripeService = stripeService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
@@ -71,4 +77,19 @@ public class PaymentController {
         paymentService.deletePayment(paymentId, version);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/my-payments")
+    public ResponseEntity<Page<PaymentViewDto>> getMyPayments(
+            Principal principal,
+            @PageableDefault(size = 10, sort = "paymentDate,desc") Pageable pageable
+    ) {
+        String username = principal.getName();
+        MyUser user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+        UUID userId = user.getUuid();
+
+        Page<PaymentViewDto> myPayments = paymentService.getPaymentsByUserId(userId, pageable);
+        return ResponseEntity.ok(myPayments);
+    }
+
 }

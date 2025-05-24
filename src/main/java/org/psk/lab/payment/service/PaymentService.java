@@ -18,4 +18,5 @@ public interface PaymentService {
     PaymentViewDto updatePayment(UUID id, PaymentStatusUpdateDto dto);
     void deletePayment(UUID id, int version);
     void updateStatusByTransactionId(String transactionId, PaymentStatus newStatus);
+    Page<PaymentViewDto> getPaymentsByUserId(UUID userId, Pageable pageable);
 }

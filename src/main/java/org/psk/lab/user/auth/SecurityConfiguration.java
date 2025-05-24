@@ -62,6 +62,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/payments/my-payments").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.DELETE, "/api/payments/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()

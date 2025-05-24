@@ -137,4 +137,10 @@ public class DefaultPaymentService implements PaymentService {
         payment.setPaymentDate(LocalDateTime.now());
         paymentRepository.save(payment);
     }
+
+    @Override
+    public Page<PaymentViewDto> getPaymentsByUserId(UUID userId, Pageable pageable) {
+        return paymentRepository.findAllByOrder_MyUser_Uuid(userId, pageable)
+                .map(mapper::toViewDto);
+    }
 }
