@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class NotificationMapper {
 
     public NotificationDto toDto(Notification notification) {
+        if (notification == null) return null;
         return NotificationDto.builder()
                 .id(notification.getId())
                 .message(notification.getMessage())
@@ -21,6 +22,7 @@ public class NotificationMapper {
     }
 
     public Notification toEntity(NotificationDto dto) {
+        if (dto == null) return null;
         return Notification.builder()
                 .id(dto.id())
                 .message(dto.message())

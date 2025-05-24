@@ -7,6 +7,8 @@ import org.psk.lab.notification.domain.strategies.NotificationStrategy;
 import org.psk.lab.notification.helper.enums.NotificationStatus;
 import org.psk.lab.notification.helper.enums.NotificationType;
 import org.psk.lab.notification.data.repositories.NotificationRepository;
+import org.psk.lab.notification.helper.exceptions.FaultyNotificationException;
+import org.psk.lab.notification.helper.exceptions.NotificationFailedException;
 import org.psk.lab.notification.helper.mapper.NotificationMapper;
 import org.psk.lab.notification.helper.util.NotificationMessageBuilder;
 import org.psk.lab.order.data.dto.OrderViewDto;
@@ -61,12 +63,10 @@ public class NotificationService {
         strategy.send(notificationDto);
     }
 
-    public NotificationDto send(NotificationDto notificationDto) {
+    @Transactional
+    public NotificationDto send(NotificationDto notificationDto) throws NotificationFailedException {
         // find strategy
         NotificationStrategy strategy = strategies.get(notificationDto.type());
-
-        // send notification
-        strategy.send(notificationDto);
 
         // update notification status
         if(strategy.send(notificationDto)) {
@@ -75,6 +75,7 @@ public class NotificationService {
         } else {
             // sent failed
             updateNotificationStatus(notificationDto.id(), NotificationStatus.FAILED);
+            throw new NotificationFailedException(notificationDto.type(), notificationDto.id(), notificationDto.message());
         }
 
         return notificationDto;
@@ -84,11 +85,12 @@ public class NotificationService {
         * Create a new notification for the given order and type.
         * Builds the notification message using the order details.
      */
-    public NotificationDto createNotification(UUID orderId, NotificationType type) {
+    @Transactional
+    public NotificationDto createNotification(UUID orderId, NotificationType type) throws FaultyNotificationException {
         Notification notification = new Notification();
         Optional<OrderViewDto> order = orderService.getOrderById(orderId);
         if (order.isEmpty()) {
-            throw new RuntimeException("Order not found");
+            throw new FaultyNotificationException("InvalidOrder, id: " + orderId);
         }
 
         // build notification message
@@ -109,10 +111,10 @@ public class NotificationService {
     }
 
     @Transactional
-    public void updateNotificationStatus(UUID notificationId, NotificationStatus status) {
+    public void updateNotificationStatus(UUID notificationId, NotificationStatus status) throws FaultyNotificationException {
         Optional<Notification> notification = notificationRepository.findById(notificationId);
         if (notification.isEmpty()) {
-            throw new RuntimeException("Notification not found");
+            throw new FaultyNotificationException("Notification not found, id: " + notificationId);
         }
 
         // update notification status

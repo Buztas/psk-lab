@@ -18,4 +18,14 @@ public record NotificationDto (
         @NotNull UUID orderId,
         @NotNull NotificationStatus status,
         @NotNull NotificationType type
-){}
+){
+    @Override
+    public String toString() {
+        return "Notification id: " + id +
+                ", message: '" + message + '\'' +
+                ", createdAt: " + createdAt +
+                ", orderId: " + orderId +
+                ", status: " + status +
+                ", type: " + type;
+    }
+}
