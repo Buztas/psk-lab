@@ -149,4 +149,10 @@ public class OrderService {
 
         orderRepository.deleteById(orderId);
     }
+
+    public MyUser getUserByOrderId(UUID orderId) {
+        return orderRepository.findById(orderId)
+                .map(Order::getMyUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+    }
 }
