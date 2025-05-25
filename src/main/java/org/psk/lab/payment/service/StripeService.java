@@ -23,4 +23,13 @@ public class StripeService {
             throw new RuntimeException("Stripe payment creation failed", e);
         }
     }
+
+    public String getPaymentIntentClientSecret(String paymentIntentId) {
+        try {
+            PaymentIntent paymentIntent = PaymentIntent.retrieve(paymentIntentId);
+            return paymentIntent.getClientSecret();
+        } catch (StripeException e) {
+            throw new RuntimeException("Failed to retrieve PaymentIntent client secret", e);
+        }
+    }
 }

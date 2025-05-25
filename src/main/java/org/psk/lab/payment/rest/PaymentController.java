@@ -45,8 +45,10 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> createPayment(@Valid @RequestBody PaymentCreateDto dto) {
         PaymentViewDto payment = paymentService.createPayment(dto);
+        String clientSecret = stripeService.getPaymentIntentClientSecret(payment.getTransactionId());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                Map.of("payment", payment,"clientSecret", payment.getTransactionId())
+                Map.of("payment", payment, "clientSecret", clientSecret)
         );
     }
 

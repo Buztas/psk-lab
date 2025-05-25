@@ -120,10 +120,6 @@ public class DefaultPaymentService implements PaymentService {
         if (newStatus == PaymentStatus.PROCESSING && currentStatus != PaymentStatus.PENDING) {
             throw new IllegalStateException("Can only process payments from PENDING status");
         }
-
-        if (newStatus == PaymentStatus.COMPLETED && currentStatus != PaymentStatus.PROCESSING) {
-            throw new IllegalStateException("Can only complete payments from PROCESSING status");
-        }
     }
 
     @Override
