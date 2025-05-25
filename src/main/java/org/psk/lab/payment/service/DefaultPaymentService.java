@@ -3,6 +3,7 @@ package org.psk.lab.payment.service;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import jakarta.persistence.OptimisticLockException;
+import org.psk.lab.order.data.dto.OrderViewDto;
 import org.psk.lab.order.data.model.Order;
 import org.psk.lab.order.data.repository.OrderRepository;
 import org.psk.lab.payment.data.dto.PaymentCreateDto;
@@ -12,6 +13,7 @@ import org.psk.lab.payment.data.model.Payment;
 import org.psk.lab.payment.data.model.PaymentStatus;
 import org.psk.lab.payment.data.repository.PaymentRepository;
 import org.psk.lab.payment.exception.OptimisticPaymentLockException;
+import org.psk.lab.payment.exception.PaymentAlreadyExistsException;
 import org.psk.lab.payment.exception.PaymentNotFoundException;
 import org.psk.lab.payment.mapper.PaymentMapper;
 import org.springframework.data.domain.Page;
@@ -46,6 +48,12 @@ public class DefaultPaymentService implements PaymentService {
     public PaymentViewDto createPayment(PaymentCreateDto dto) {
         Order order = orderRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+        var existingPayment = paymentRepository.getPaymentByOrderId(dto.getOrderId());
+        System.out.println("Existing payment: " + existingPayment);
+        if(existingPayment.isPresent()) {
+            throw new PaymentAlreadyExistsException(dto.getOrderId());
+        }
 
         BigDecimal amount = order.getTotalAmount(); // in EUR
         String description = "Payment for order " + order.getOrderId();

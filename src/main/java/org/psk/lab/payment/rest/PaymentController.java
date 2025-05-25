@@ -10,6 +10,7 @@ import org.psk.lab.payment.data.dto.PaymentCreateDto;
 import org.psk.lab.payment.data.dto.PaymentStatusUpdateDto;
 import org.psk.lab.payment.data.dto.PaymentViewDto;
 import org.psk.lab.payment.data.dto.StripePaymentRequestDto;
+import org.psk.lab.payment.exception.PaymentAlreadyExistsException;
 import org.psk.lab.payment.service.PaymentService;
 import org.psk.lab.payment.service.StripeService;
 import org.psk.lab.user.data.model.MyUser;
@@ -44,12 +45,16 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createPayment(@Valid @RequestBody PaymentCreateDto dto) {
-        PaymentViewDto payment = paymentService.createPayment(dto);
-        String clientSecret = stripeService.getPaymentIntentClientSecret(payment.getTransactionId());
+        try {
+            PaymentViewDto payment = paymentService.createPayment(dto);
+            String clientSecret = stripeService.getPaymentIntentClientSecret(payment.getTransactionId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                Map.of("payment", payment, "clientSecret", clientSecret)
-        );
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    Map.of("payment", payment, "clientSecret", clientSecret)
+            );
+        } catch (PaymentAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Order already with payment already exists, order id:", dto.getOrderId()));
+        }
     }
 
     @PatchMapping("/{paymentId}/status")

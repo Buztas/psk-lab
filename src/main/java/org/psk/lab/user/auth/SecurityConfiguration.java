@@ -57,7 +57,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/api/orders/user/{userId}").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/api/orders/my-orders").hasRole("CUSTOMER")
-                        .requestMatchers(HttpMethod.PUT, "/api/orders/{orderId}/status").hasAnyRole("EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/orders/{orderId}/status").hasAnyRole("EMPLOYEE", "ADMIN", "CUSTOMER")
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/{orderId}").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/payments/my-payments").hasRole("CUSTOMER")
