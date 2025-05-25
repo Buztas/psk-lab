@@ -60,9 +60,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/api/orders/{orderId}/status").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/{orderId}").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/payments/my-payments").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/payments/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
