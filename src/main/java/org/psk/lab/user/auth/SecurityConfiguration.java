@@ -57,10 +57,10 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/api/orders/user/{userId}").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/api/orders/my-orders").hasRole("CUSTOMER")
-                        .requestMatchers(HttpMethod.PUT, "/api/orders/{orderId}/status").hasAnyRole("EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/orders/{orderId}/status").hasAnyRole("EMPLOYEE", "ADMIN", "CUSTOMER")
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/{orderId}").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/payments/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/payments/my-payments").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/payments/**").hasRole("ADMIN")
 
@@ -75,7 +75,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
 
