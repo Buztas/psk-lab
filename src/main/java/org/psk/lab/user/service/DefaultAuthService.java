@@ -8,12 +8,14 @@ import org.psk.lab.user.data.response.UserResponse;
 import org.psk.lab.user.exception.InvalidUserCredentials;
 import org.psk.lab.user.exception.UserAlreadyExistsException;
 import org.psk.lab.user.util.JwtUtil;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@LogInvocations
 public class DefaultAuthService implements AuthService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;

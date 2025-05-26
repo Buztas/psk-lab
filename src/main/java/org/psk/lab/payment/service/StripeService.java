@@ -3,11 +3,13 @@ package org.psk.lab.payment.service;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
+@LogInvocations
 public class StripeService {
 
     public PaymentIntent createPaymentIntent(BigDecimal amount, String currency, String description) {

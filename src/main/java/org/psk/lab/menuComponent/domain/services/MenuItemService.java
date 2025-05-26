@@ -7,6 +7,7 @@ import org.psk.lab.menuComponent.domain.entities.MenuItem;
 import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
 import org.psk.lab.menuComponent.helper.mappers.MenuMapper;
 import org.psk.lab.menuComponent.repository.MenuItemRepository;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@LogInvocations
 public class MenuItemService {
     private final MenuItemRepository menuItemRepository;
     private final MenuMapper menuMapper;

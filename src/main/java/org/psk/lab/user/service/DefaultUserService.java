@@ -7,6 +7,7 @@ import org.psk.lab.user.data.dto.UserUpdateDTO;
 import org.psk.lab.user.data.repository.UserRepository;
 import org.psk.lab.user.data.response.UserResponse;
 import org.psk.lab.user.exception.UserNotFoundException;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@LogInvocations
 public class DefaultUserService implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;

@@ -8,6 +8,7 @@ import org.psk.lab.menuComponent.helper.exceptions.OutOfStockException;
 import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
 import org.psk.lab.menuComponent.repository.ItemVariationRepository;
 import org.psk.lab.menuComponent.repository.MenuItemRepository;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@LogInvocations
 public class InventoryManager {
     private final MenuItemRepository menuItemRepository;
     private final ItemVariationRepository itemVariationRepository;

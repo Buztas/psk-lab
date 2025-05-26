@@ -16,6 +16,7 @@ import org.psk.lab.payment.service.StripeService;
 import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.repository.UserRepository;
 import org.psk.lab.user.exception.UserNotFoundException;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,6 +33,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/payments")
 @Tag(name = "Payment", description = "Endpoints regarding payment management")
+@LogInvocations
 public class PaymentController {
     private final PaymentService paymentService;
     private final StripeService stripeService;

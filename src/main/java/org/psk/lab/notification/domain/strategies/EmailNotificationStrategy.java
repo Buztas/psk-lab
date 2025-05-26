@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.psk.lab.notification.domain.dtos.NotificationDto;
 import org.psk.lab.notification.helper.enums.NotificationType;
 import org.psk.lab.order.service.OrderService;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailAuthenticationException;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
+@LogInvocations
 public class EmailNotificationStrategy implements NotificationStrategy{
     private static final Logger log = LoggerFactory.getLogger(EmailNotificationStrategy.class);
 

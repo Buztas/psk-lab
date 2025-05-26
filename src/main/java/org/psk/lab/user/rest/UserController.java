@@ -3,10 +3,10 @@ package org.psk.lab.user.rest;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.psk.lab.user.data.dto.UserDTO;
 import org.psk.lab.user.data.dto.UserUpdateDTO;
 import org.psk.lab.user.data.response.UserResponse;
 import org.psk.lab.user.service.UserService;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +18,7 @@ import java.util.UUID;
 @RequestMapping("/api/user")
 @Tag(name = "User", description = "Endpoints regarding user management")
 @Validated
+@LogInvocations
 public class UserController {
 
     private final UserService userService;

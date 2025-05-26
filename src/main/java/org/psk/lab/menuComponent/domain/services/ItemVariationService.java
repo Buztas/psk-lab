@@ -7,6 +7,7 @@ import org.psk.lab.menuComponent.domain.entities.ItemVariation;
 import org.psk.lab.menuComponent.helper.exceptions.ResourceNotFoundException;
 import org.psk.lab.menuComponent.helper.mappers.MenuMapper;
 import org.psk.lab.menuComponent.repository.ItemVariationRepository;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@LogInvocations
 public class ItemVariationService {
     private final ItemVariationRepository itemVariationRepository;
     private final MenuMapper menuMapper;
