@@ -1,6 +1,7 @@
 package org.psk.lab.user.service;
 
 import org.psk.lab.user.data.repository.UserRepository;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@LogInvocations
 public class AuthDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 

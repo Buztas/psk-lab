@@ -20,6 +20,7 @@ import org.psk.lab.order.exception.OrderNotFoundException;
 import org.psk.lab.order.mapper.OrderMapper;
 import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.repository.UserRepository;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -31,6 +32,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@LogInvocations
 public class OrderService {
 
     private final OrderRepository orderRepository;

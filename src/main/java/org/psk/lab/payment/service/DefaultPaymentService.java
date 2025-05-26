@@ -16,6 +16,7 @@ import org.psk.lab.payment.exception.OptimisticPaymentLockException;
 import org.psk.lab.payment.exception.PaymentAlreadyExistsException;
 import org.psk.lab.payment.exception.PaymentNotFoundException;
 import org.psk.lab.payment.mapper.PaymentMapper;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@LogInvocations
 public class DefaultPaymentService implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper mapper;

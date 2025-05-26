@@ -13,6 +13,7 @@ import org.psk.lab.notification.helper.mapper.NotificationMapper;
 import org.psk.lab.notification.helper.util.NotificationMessageBuilder;
 import org.psk.lab.order.data.dto.OrderViewDto;
 import org.psk.lab.order.service.OrderService;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
+@LogInvocations
 public class NotificationService {
     private final NotificationMapper notificationMapper;
     private final OrderService orderService;

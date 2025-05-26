@@ -8,7 +8,7 @@ import org.psk.lab.menuComponent.api.dto.ItemVariationDto;
 import org.psk.lab.menuComponent.api.dto.MenuItemDto;
 import org.psk.lab.menuComponent.domain.services.ItemVariationService;
 import org.psk.lab.menuComponent.domain.services.MenuItemService;
-import org.psk.lab.notification.domain.services.NotificationService;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Menu", description = "Endpoints regarding menu management")
 @Validated
+@LogInvocations
 public class MenuController {
     private final ItemVariationService itemVariationService;
     private final MenuItemService menuItemService;

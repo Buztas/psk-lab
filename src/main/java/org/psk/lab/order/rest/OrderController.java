@@ -12,6 +12,7 @@ import org.psk.lab.order.service.OrderService;
 import org.psk.lab.user.data.model.MyUser;
 import org.psk.lab.user.data.repository.UserRepository;
 import org.psk.lab.user.exception.UserNotFoundException;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -29,6 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Order", description = "Endpoints regarding order management")
 @Validated
+@LogInvocations
 public class OrderController {
 
     private final OrderService orderService;

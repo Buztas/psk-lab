@@ -3,6 +3,7 @@ package org.psk.lab.notification.helper.util;
 import org.psk.lab.menuComponent.api.dto.ItemVariationDto;
 import org.psk.lab.order.data.dto.OrderItemViewDto;
 import org.psk.lab.order.data.dto.OrderViewDto;
+import org.psk.lab.util.interceptor.LogInvocations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@LogInvocations
 public class NotificationMessageBuilder {
 
     public static String buildNotificationMessage(String orderAction, OrderViewDto orderViewDto) {
